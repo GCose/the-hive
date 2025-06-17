@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #364942;
+      }
+
+      .cls-2 {
+        fill: #d6a327;
+      }
+
+      .cls-3 {
+        font-size: 24.21px;
+        letter-spacing: .06em;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #404041;
+      }
+
+      .cls-3, .cls-4, .cls-5 {
+        font-family: JosefinSansRoman-Regular, 'Josefin Sans';
+        font-variation-settings: 'wght' 400;
+      }
+
+      .cls-4 {
+        font-size: 94.82px;
+        letter-spacing: .22em;
+      }
+
+      .cls-5 {
+        fill: #bbbdbf;
+        font-size: 20.17px;
+      }
+
+      .cls-6 {
+        letter-spacing: -.08em;
+      }
+
+      .cls-7 {
+        letter-spacing: -.04em;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <polygon class="cls-1" points="635.06 401.09 602.74 420.1 603.04 457.6 635.66 476.09 667.99 457.08 667.69 419.58 635.06 401.09"/>
+      <polygon class="cls-1" points="699.64 363.11 667.31 382.12 667.61 419.63 700.24 438.12 732.57 419.11 732.27 381.61 699.64 363.11"/>
+    </g>
+    <polygon class="cls-1" points="635.7 476.07 603.38 495.08 603.67 532.58 636.3 551.08 668.63 532.07 668.33 494.56 635.7 476.07"/>
+    <polygon class="cls-2" points="700.28 438.1 667.95 457.11 668.25 494.61 700.88 513.1 733.21 494.09 732.91 456.59 700.28 438.1"/>
+    <polygon class="cls-1" points="764.86 400.12 732.53 419.13 732.83 456.63 765.46 475.13 797.79 456.12 797.49 418.61 764.86 400.12"/>
+    <g>
+      <polygon class="cls-1" points="700.92 513.08 668.59 532.09 668.89 569.59 701.52 588.08 733.85 569.07 733.55 531.57 700.92 513.08"/>
+      <polygon class="cls-1" points="765.5 475.1 733.17 494.11 733.47 531.62 766.1 550.11 798.43 531.1 798.13 493.59 765.5 475.1"/>
+    </g>
+    <text class="cls-5" transform="translate(808 433.38)"><tspan class="cls-7" x="0" y="0">T</tspan><tspan class="cls-6" x="10.91" y="0">M</tspan></text>
+  </g>
+  <text class="cls-3" transform="translate(197.48 475.93)"><tspan x="0" y="0">THE</tspan></text>
+  <text class="cls-4" transform="translate(260.05 526.02)"><tspan x="0" y="0">HIVE</tspan></text>
+</svg>
