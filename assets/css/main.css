@@ -632,7 +632,7 @@ section {
   font-weight: 500;
   line-height: 1.5;
   color: var(--color-white);
-  font-size: clamp(3rem, 5.5vw, 12rem);
+  font-size: clamp(4rem, 5.5vw, 12rem);
 }
 
 .hero__title em {
@@ -748,10 +748,6 @@ section {
     bottom: 15rem;
   }
 
-  .hero__title {
-    font-size: clamp(3rem, 6vw, 5rem);
-  }
-
   .hero__menu {
     left: 2rem;
     bottom: 2rem;
@@ -772,12 +768,12 @@ section {
 
 @media screen and (max-width: 480px) {
   .hero__content {
-    bottom: 10rem;
+    bottom: 15rem;
   }
 
   .hero__caption {
     padding: 2rem;
-    margin-top: 1rem;
+    margin-top: 10%;
   }
 }
 
