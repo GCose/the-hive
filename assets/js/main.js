@@ -266,6 +266,7 @@ function initFeaturesSliding() {
 
   updateSpreadsOnScroll();
 }
+
 /**=====================================================
  *  Function that handles GSAP animations for features.
  ======================================================*/
