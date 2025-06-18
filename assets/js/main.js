@@ -109,7 +109,6 @@ function initFeaturesSliding() {
 
   if (!spreads.length || !featuresSection || !whySection) return;
 
-  // All spreads are part of the animation now
   spreads.forEach((spread, index) => {
     spread.style.transform = "translateY(100%)";
     spread.style.zIndex = 50 + index;
