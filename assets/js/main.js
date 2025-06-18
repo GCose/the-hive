@@ -340,7 +340,7 @@ function initSpacesHorizontal() {
   spacesWrapper.style.width = `${totalWidth}px`;
 
   // Set scroll area height based on number of slides and desired scroll speed
-  const scrollMultiplier = 1.2; // Adjust to change scroll sensitivity
+  const scrollMultiplier = 1.2;
   scrollArea.style.height = `${totalSlides * 100 * scrollMultiplier}vh`;
 
   let isFixed = false;
@@ -383,9 +383,6 @@ function initSpacesHorizontal() {
     // Determine scroll direction
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
 
-    // FIX FOR ISSUE #3: Proper handling of scrolling back up
-    // Improved condition to check if we're in the spaces section
-    // For smoother transition, include a buffer when scrolling up
     const bufferHeight = viewportHeight * 0.5;
     const isInSectionRange =
       (scrollDirection === "down" &&
@@ -402,8 +399,6 @@ function initSpacesHorizontal() {
         spacesSection.classList.add("is-fixed");
       }
 
-      // Calculate horizontal translation based on vertical scroll
-      // For scrolling up, ensure we use the proper range to prevent jumps
       const scrollProgress = Math.max(
         0,
         (scrollTop - sectionTop) / scrollableHeight
@@ -425,8 +420,6 @@ function initSpacesHorizontal() {
       scrollTop <
       sectionTop - (scrollDirection === "up" ? bufferHeight : 0)
     ) {
-      // Reset when scrolling above the section
-      // Only reset if we're sufficiently above the section to prevent flickering
       if (isFixed) {
         isFixed = false;
         isCompleted = false;
@@ -444,8 +437,6 @@ function initSpacesHorizontal() {
         isCompleted = true;
         spacesSection.classList.remove("is-fixed");
         spacesSection.classList.add("completed");
-
-        // No forced transform - let scroll position determine final position
       }
     }
 

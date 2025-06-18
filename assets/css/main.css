@@ -243,12 +243,12 @@ section {
   left: 0;
   opacity: 0;
   width: 100%;
-  z-index: 100;
+  z-index: 1000;
   height: 100vh;
   position: fixed;
   overflow-y: auto;
   visibility: hidden;
-  background: transparent;
+  background: #3e5243ac;
   color: var(--color-white);
   backdrop-filter: blur(0px);
   transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -570,26 +570,28 @@ section {
   z-index: 999;
   bottom: 0.5rem;
   position: fixed;
-  background: black;
-  border-radius: 1rem;
 }
 
 .hero__menu-btn {
   gap: 2rem;
-  display: flex;
   border: none;
+  display: flex;
   cursor: pointer;
-  font-size: 1.6rem;
+  color: white;
+  font-size: 1.8rem;
   align-items: center;
-  background: transparent;
-  padding: 1.2rem 2.4rem;
-  color: var(--color-white);
+  border-radius: 1rem;
+  padding: 1rem 1.8rem;
   font-family: var(--font-primary);
+  background: var(--color-secondary);
 }
 
 .hero__menu-icon {
   gap: 4px;
   display: flex;
+  padding: 1rem;
+  border-radius: 100%;
+  background: var(--color-primary);
   flex-direction: column;
 }
 
@@ -597,7 +599,7 @@ section {
   width: 2rem;
   height: 2px;
   transition: var(--transition);
-  background-color: var(--color-white);
+  background-color: var(--color-light);
 }
 
 .hero__caption {
@@ -953,6 +955,14 @@ section {
 .features {
   padding: 0;
   position: relative;
+  background: linear-gradient(
+    to right,
+    rgba(62, 82, 67, 0.95) 0%,
+    rgba(62, 82, 67, 0.8) 20%,
+    rgba(212, 168, 43, 0.3) 45%,
+    rgba(212, 168, 43, 0.1) 65%,
+    var(--color-light) 100%
+  );
 }
 
 .features__container {
@@ -1320,12 +1330,11 @@ section {
   position: relative;
   flex-direction: column;
   justify-content: center;
-  background-color: var(--color-primary);
   background: linear-gradient(
     135deg,
-    var(--color-primary) 0%,
-    var(--color-primary) 85%,
-    rgba(62, 82, 67, 0.9) 100%
+    #2a3c31 0%,
+    var(--color-primary) 65%,
+    #44594a 100%
   );
 }
 
@@ -1563,7 +1572,6 @@ section {
   }
 
   .spaces__slide-content {
-    max-width: 85%;
     padding: 0 4vw 15vh 4vw;
   }
 
