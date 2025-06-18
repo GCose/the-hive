@@ -1100,10 +1100,10 @@ section {
   min-height: 100vh;
   visibility: hidden;
   align-items: center;
-  border-radius: 5rem;
   background-size: cover;
   transform: translateY(100%);
   background-position: center;
+  border-radius: 6rem 6rem 0 0;
   background-repeat: no-repeat;
   background-attachment: fixed;
   transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
