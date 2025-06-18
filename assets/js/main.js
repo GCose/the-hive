@@ -1,5 +1,5 @@
 /**===============================
- *  Function that handles loading animation
+ * Function that handles loading animation
  ================================*/
 function initLoader() {
   const loader = document.querySelector(".loader");
@@ -24,7 +24,7 @@ function initLoader() {
 }
 
 /**============================================
- *  Function that handles menu overlay toggle
+ * Function that handles menu overlay toggle
  =============================================*/
 function initMenuToggle() {
   const menuToggle = document.querySelector(".hero__menu-toggle");
@@ -61,45 +61,45 @@ function initMenuToggle() {
 }
 
 /**===============================
- *  Function that handles header state
+ * Function that handles header state
  ================================*/
-function initHeader() {
-  const header = document.querySelector(".header");
+// function initHeader() {
+//   const header = document.querySelector(".header");
 
-  // Header scroll state for visibility on different sections
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 100) {
-      header.classList.add("header--scrolled");
-    } else {
-      header.classList.remove("header--scrolled");
-    }
-  });
-}
+//   // Header scroll state for visibility on different sections
+//   window.addEventListener("scroll", () => {
+//     if (window.scrollY > 100) {
+//       header.classList.add("header--scrolled");
+//     } else {
+//       header.classList.remove("header--scrolled");
+//     }
+//   });
+// }
 
 /**===============================
- *  Function that initializes smooth scrolling
+ * Function that initializes smooth scrolling
  ================================*/
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
-      e.preventDefault();
+// function initSmoothScroll() {
+//   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+//     anchor.addEventListener("click", function (e) {
+//       e.preventDefault();
 
-      const targetId = this.getAttribute("href");
-      if (targetId === "#") return;
+//       const targetId = this.getAttribute("href");
+//       if (targetId === "#") return;
 
-      const targetElement = document.querySelector(targetId);
-      if (targetElement) {
-        window.scrollTo({
-          top: targetElement.offsetTop - 80, // Adjust for header height
-          behavior: "smooth",
-        });
-      }
-    });
-  });
-}
+//       const targetElement = document.querySelector(targetId);
+//       if (targetElement) {
+//         window.scrollTo({
+//           top: targetElement.offsetTop - 80, // Adjust for header height
+//           behavior: "smooth",
+//         });
+//       }
+//     });
+//   });
+// }
 
 /**==========================================================
- *  Function that handles features scroll-triggered sliding.
+ * Function that handles features scroll-triggered sliding.
  ===========================================================*/
 function initFeaturesSliding() {
   const spreads = document.querySelectorAll(".features__spread");
@@ -267,7 +267,7 @@ function initFeaturesSliding() {
 }
 
 /**=====================================================
- *  Function that handles GSAP animations for features.
+ * Function that handles GSAP animations for features.
  ======================================================*/
 function initFeaturesGSAP() {
   if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
@@ -310,7 +310,7 @@ function initFeaturesGSAP() {
 }
 
 /**=======================================================
- *  Function that initializes all features functionality
+ * Function that initializes all features functionality
  ========================================================*/
 function initFeatures() {
   initFeaturesSliding();
@@ -318,6 +318,184 @@ function initFeatures() {
   if (typeof gsap !== "undefined") {
     initFeaturesGSAP();
   }
+}
+
+/**==================================================================
+ * Function that handles horizontal scroll based on vertical scroll
+ ===================================================================*/
+function initSpacesHorizontal() {
+  const spacesSection = document.querySelector(".spaces__horizontal");
+  if (!spacesSection) return;
+
+  const spacesWrapper = document.querySelector(".spaces__wrapper");
+  const slides = document.querySelectorAll(".spaces__slide");
+  const scrollArea = document.querySelector(".spaces__scroll-area");
+
+  // Calculate total width based on slides
+  const totalSlides = slides.length;
+  const slideWidth = window.innerWidth; // Each slide is 100vw
+  const totalWidth = slideWidth * totalSlides;
+
+  // Set wrapper width to accommodate all slides
+  spacesWrapper.style.width = `${totalWidth}px`;
+
+  // Set scroll area height based on number of slides and desired scroll speed
+  const scrollMultiplier = 1.2; // Adjust to change scroll sensitivity
+  scrollArea.style.height = `${totalSlides * 100 * scrollMultiplier}vh`;
+
+  let isFixed = false;
+  let isCompleted = false;
+  let lastScrollTop = 0; // Track last scroll position for direction detection
+
+  // Track if we're actually scrolling
+  let isScrolling = false;
+  let scrollTimeout;
+
+  // Update values on resize
+  function updateDimensions() {
+    const newSlideWidth = window.innerWidth;
+    const newTotalWidth = newSlideWidth * totalSlides;
+
+    spacesWrapper.style.width = `${newTotalWidth}px`;
+
+    // If we're currently in the fixed state, update the transform
+    if (isFixed && !isCompleted) {
+      const scrollTop = window.pageYOffset;
+      const sectionTop = spacesSection.offsetTop;
+      const scrollableHeight = scrollArea.offsetHeight;
+
+      const scrollProgress = (scrollTop - sectionTop) / scrollableHeight;
+      const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+      const transformX = -clampedProgress * (newTotalWidth - newSlideWidth);
+
+      spacesWrapper.style.transform = `translateX(${transformX}px)`;
+    }
+  }
+
+  // Handle scroll event
+  function handleScroll() {
+    const scrollTop = window.pageYOffset;
+    const sectionTop = spacesSection.offsetTop;
+    const sectionHeight = spacesSection.offsetHeight;
+    const viewportHeight = window.innerHeight;
+    const scrollableHeight = scrollArea.offsetHeight;
+
+    // Determine scroll direction
+    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
+
+    // FIX FOR ISSUE #3: Proper handling of scrolling back up
+    // Improved condition to check if we're in the spaces section
+    // For smoother transition, include a buffer when scrolling up
+    const bufferHeight = viewportHeight * 0.5;
+    const isInSectionRange =
+      (scrollDirection === "down" &&
+        scrollTop >= sectionTop &&
+        scrollTop <= sectionTop + sectionHeight - viewportHeight) ||
+      (scrollDirection === "up" &&
+        scrollTop >= sectionTop - bufferHeight &&
+        scrollTop <= sectionTop + sectionHeight - viewportHeight);
+
+    if (isInSectionRange) {
+      // Fix the wrapper when we're in the section
+      if (!isFixed) {
+        isFixed = true;
+        spacesSection.classList.add("is-fixed");
+      }
+
+      // Calculate horizontal translation based on vertical scroll
+      // For scrolling up, ensure we use the proper range to prevent jumps
+      const scrollProgress = Math.max(
+        0,
+        (scrollTop - sectionTop) / scrollableHeight
+      );
+      const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+      const transformX = -clampedProgress * (totalWidth - slideWidth);
+
+      // Apply the translation with smooth easing
+      requestAnimationFrame(() => {
+        spacesWrapper.style.transform = `translateX(${transformX}px)`;
+      });
+
+      // Reset completed state if we're scrolling back up
+      if (scrollDirection === "up" && isCompleted) {
+        isCompleted = false;
+        spacesSection.classList.remove("completed");
+      }
+    } else if (
+      scrollTop <
+      sectionTop - (scrollDirection === "up" ? bufferHeight : 0)
+    ) {
+      // Reset when scrolling above the section
+      // Only reset if we're sufficiently above the section to prevent flickering
+      if (isFixed) {
+        isFixed = false;
+        isCompleted = false;
+        spacesSection.classList.remove("is-fixed", "completed");
+
+        // Smooth transition back to start position
+        requestAnimationFrame(() => {
+          spacesWrapper.style.transform = "translateX(0)";
+        });
+      }
+    } else if (scrollTop > sectionTop + sectionHeight - viewportHeight) {
+      // Mark as completed when we've scrolled past, but don't force transform
+      if (isFixed && !isCompleted) {
+        isFixed = false;
+        isCompleted = true;
+        spacesSection.classList.remove("is-fixed");
+        spacesSection.classList.add("completed");
+
+        // No forced transform - let scroll position determine final position
+      }
+    }
+
+    // Store last scroll position for direction detection
+    lastScrollTop = scrollTop;
+
+    // Reset scrolling flag after a delay
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+    }, 100);
+  }
+
+  // Use passive scroll event listener with improved throttling
+  let ticking = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      isScrolling = true;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    },
+    { passive: true }
+  );
+
+  // Handle resize with debouncing
+  let resizeTimeout;
+  window.addEventListener(
+    "resize",
+    () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        updateDimensions();
+      }, 100);
+    },
+    { passive: true }
+  );
+
+  // Initial setup
+  updateDimensions();
+
+  // Delay initial handleScroll to ensure proper positioning
+  setTimeout(() => {
+    handleScroll();
+  }, 100);
 }
 
 /**=============================================
@@ -501,9 +679,10 @@ function initAnimations() {
 function init() {
   initLoader();
   initMenuToggle();
-  initHeader();
-  initSmoothScroll();
+  // initHeader();
+  // initSmoothScroll();
   initFeatures();
+  initSpacesHorizontal();
 }
 
 document.addEventListener("DOMContentLoaded", init);
