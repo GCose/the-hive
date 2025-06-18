@@ -1366,6 +1366,7 @@ section {
   }
 
   .features__spread-intro {
+    line-height: 2;
     font-size: clamp(2rem, 3vw, 2.8rem);
   }
 }
