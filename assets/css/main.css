@@ -752,28 +752,17 @@ section {
     left: 2rem;
     bottom: 2rem;
   }
-
-  .hero__caption {
-    position: static;
-    margin: 2rem auto 0;
-    width: calc(100% - 4rem);
-    backdrop-filter: blur(30px);
-    background: rgba(0, 0, 0, 0.6);
-  }
-
-  .hero__caption::before {
-    margin-bottom: 1rem;
-  }
 }
 
 @media screen and (max-width: 480px) {
   .hero__content {
-    bottom: 15rem;
+    bottom: 10rem;
   }
 
   .hero__caption {
     padding: 2rem;
-    margin-top: 10%;
+    margin-top: 1%;
+    width: calc(100% - 4rem);
   }
 }
 
@@ -1314,6 +1303,11 @@ section {
   .features__spread-content {
     grid-template-columns: 1fr;
     gap: clamp(3rem, 5vw, 4rem);
+  }
+
+  .features__spread-intro {
+    line-height: 2;
+    font-size: clamp(2rem, 3vw, 4rem);
   }
 }
 
