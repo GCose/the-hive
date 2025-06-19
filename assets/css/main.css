@@ -568,8 +568,9 @@ section {
   left: 50%;
   z-index: 10;
   z-index: 999;
-  bottom: 0.5rem;
+  bottom: 0;
   position: fixed;
+  transform: translate(-50%, -50%);
 }
 
 .hero__menu-btn {
@@ -675,11 +676,6 @@ section {
   .hero__content {
     left: 2rem;
     bottom: 15rem;
-  }
-
-  .hero__menu {
-    left: 2rem;
-    bottom: 2rem;
   }
 }
 
