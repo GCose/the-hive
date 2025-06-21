@@ -103,10 +103,7 @@ function initFeaturesSliding() {
       ? featuresTop + featuresContainer.offsetHeight
       : featuresTop;
     const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
-    const featuresEndTrigger = Math.min(
-      featuresBottom - windowHeight,
-      spacesTop - windowHeight
-    );
+    const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
 
     // Determine scroll direction
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
@@ -205,7 +202,7 @@ function initFeaturesSliding() {
       );
 
       spreads.forEach((spread, index) => {
-        const cardStartProgress = index * 0.2; // 5 cards, so 0.2 each
+        const cardStartProgress = index * 0.2;
         const cardCompleteProgress = cardStartProgress + 0.15;
         const nextCardStartProgress = (index + 1) * 0.2;
 
@@ -214,6 +211,7 @@ function initFeaturesSliding() {
           (index === spreads.length - 1 ||
             scrollProgress < nextCardStartProgress)
         ) {
+          // Current active card
           const cardProgress = Math.max(
             0,
             Math.min(
@@ -223,9 +221,18 @@ function initFeaturesSliding() {
             )
           );
 
+          let scale = 1;
+          let opacity = 1;
+
+          // Special handling for first card
+          if (index === 0 && cardProgress < 1) {
+            // First card: starts at scale(0.7) and scales up to scale(1)
+            scale = 0.7 + cardProgress * 0.3; // 0.7 → 1.0
+          }
+
           const translateY = (1 - cardProgress) * 100;
-          spread.style.transform = `translateY(${translateY}%)`;
-          spread.style.opacity = "1";
+          spread.style.transform = `translateY(${translateY}%) scale(${scale})`;
+          spread.style.opacity = opacity;
           spread.style.visibility = "visible";
           spread.classList.add("features__spread--visible");
 
@@ -234,19 +241,18 @@ function initFeaturesSliding() {
           );
 
           if (cardProgress > 0.3) {
-            elements.forEach((el, elIndex) => {
+            elements.forEach((el) => {
               el.style.opacity = "1";
               el.style.transform = "translateY(0)";
-              el.style.transitionDelay = `${elIndex * 0.1}s`;
             });
           } else {
             elements.forEach((el) => {
               el.style.opacity = "0";
               el.style.transform = "translateY(50px)";
-              el.style.transitionDelay = "0s";
             });
           }
         } else if (scrollProgress < cardStartProgress) {
+          // Card is before its time
           spread.style.transform = "translateY(100%)";
           spread.style.opacity = "0";
           spread.style.visibility = "hidden";
@@ -258,11 +264,28 @@ function initFeaturesSliding() {
           elements.forEach((el) => {
             el.style.opacity = "0";
             el.style.transform = "translateY(50px)";
-            el.style.transitionDelay = "0s";
           });
         } else if (scrollProgress >= cardCompleteProgress) {
-          spread.style.transform = "translateY(0)";
-          spread.style.opacity = "1";
+          // Card has completed its entrance
+          let scale = 1;
+          let opacity = 1;
+
+          // Check if the NEXT card is starting to come in
+          if (index < spreads.length - 1) {
+            const nextCardStart = (index + 1) * 0.2;
+            if (scrollProgress >= nextCardStart) {
+              // Next card is sliding in, so THIS card (previous) should scale out
+              const nextCardProgress = Math.min(
+                1,
+                (scrollProgress - nextCardStart) / 0.15
+              );
+              scale = 1 - nextCardProgress * 0.2; // Scale from 1 to 0.8
+              opacity = 1 - nextCardProgress * 0.3; // Fade from 1 to 0.7
+            }
+          }
+
+          spread.style.transform = `translateY(0%) scale(${scale})`;
+          spread.style.opacity = opacity;
           spread.style.visibility = "visible";
           spread.classList.add("features__spread--visible");
 
@@ -489,7 +512,6 @@ function initSpacesHorizontal() {
     }, 100);
   }
 
-  // Use passive scroll event listener with improved throttling
   let ticking = false;
   window.addEventListener(
     "scroll",
@@ -506,7 +528,6 @@ function initSpacesHorizontal() {
     { passive: true }
   );
 
-  // Handle resize with debouncing
   let resizeTimeout;
   window.addEventListener(
     "resize",
@@ -518,11 +539,8 @@ function initSpacesHorizontal() {
     },
     { passive: true }
   );
-
-  // Initial setup
   updateDimensions();
 
-  // Delay initial handleScroll to ensure proper positioning
   setTimeout(() => {
     handleScroll();
   }, 100);
@@ -709,8 +727,6 @@ function initAnimations() {
 function init() {
   initLoader();
   initMenuToggle();
-  // initHeader();
-  // initSmoothScroll();
   initFeatures();
   initSpacesHorizontal();
 }
