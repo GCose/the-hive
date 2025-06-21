@@ -60,44 +60,6 @@ function initMenuToggle() {
   });
 }
 
-/**===============================
- * Function that handles header state
- ================================*/
-// function initHeader() {
-//   const header = document.querySelector(".header");
-
-//   // Header scroll state for visibility on different sections
-//   window.addEventListener("scroll", () => {
-//     if (window.scrollY > 100) {
-//       header.classList.add("header--scrolled");
-//     } else {
-//       header.classList.remove("header--scrolled");
-//     }
-//   });
-// }
-
-/**===============================
- * Function that initializes smooth scrolling
- ================================*/
-// function initSmoothScroll() {
-//   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-//     anchor.addEventListener("click", function (e) {
-//       e.preventDefault();
-
-//       const targetId = this.getAttribute("href");
-//       if (targetId === "#") return;
-
-//       const targetElement = document.querySelector(targetId);
-//       if (targetElement) {
-//         window.scrollTo({
-//           top: targetElement.offsetTop - 80, // Adjust for header height
-//           behavior: "smooth",
-//         });
-//       }
-//     });
-//   });
-// }
-
 /**==========================================================
  * Function that handles features scroll-triggered sliding.
  ===========================================================*/
@@ -105,11 +67,13 @@ function initFeaturesSliding() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
   const featuresContainer = document.querySelector(".features__container");
-  const whySection = document.querySelector(".why");
 
-  if (!spreads.length || !featuresSection || !whySection) return;
+  if (!spreads.length || !featuresSection) return;
 
+  // Initial setup - hide all spreads and set positioning
   spreads.forEach((spread, index) => {
+    spread.style.position = "fixed";
+    spread.style.top = "0";
     spread.style.transform = "translateY(100%)";
     spread.style.zIndex = 50 + index;
     spread.style.opacity = "0";
@@ -117,6 +81,8 @@ function initFeaturesSliding() {
   });
 
   let ticking = false;
+  let isCompleted = false;
+  let lastScrollTop = 0;
 
   function updateSpreadsOnScroll() {
     const scrollTop = window.pageYOffset;
@@ -125,7 +91,9 @@ function initFeaturesSliding() {
     const featuresRect = featuresSection.getBoundingClientRect();
     const featuresTop = scrollTop + featuresRect.top;
     const featuresBottom = featuresTop + featuresSection.offsetHeight;
-    const spacesSection = document.querySelector(".spaces");
+
+    // Get the next section to determine when to complete
+    const spacesSection = document.querySelector(".spaces__horizontal");
     const spacesTop = spacesSection
       ? scrollTop + spacesSection.getBoundingClientRect().top
       : featuresBottom;
@@ -140,11 +108,64 @@ function initFeaturesSliding() {
       spacesTop - windowHeight
     );
 
+    // Determine scroll direction
+    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
+    lastScrollTop = scrollTop;
+
+    // Check if we're in the active features section
     const inFeaturesSection =
       scrollTop >= featuresStartTrigger && scrollTop <= featuresEndTrigger;
 
-    if (!inFeaturesSection) {
+    // Check if we've completed the features section
+    const hasCompletedFeatures = scrollTop > featuresEndTrigger;
+
+    if (hasCompletedFeatures && !isCompleted) {
+      // Mark as completed - transition to static positioning like spaces section
+      isCompleted = true;
+
+      // Add completed class to features section
+      featuresSection.classList.add("features--completed");
+
+      spreads.forEach((spread, index) => {
+        if (index === spreads.length - 1) {
+          // Keep the last spread visible and transition to static positioning
+          spread.style.position = "absolute";
+          spread.style.top = "auto";
+          spread.style.bottom = "0";
+          spread.style.opacity = "1";
+          spread.style.visibility = "visible";
+          spread.style.transform = "translateY(0)";
+          spread.classList.add("features__spread--visible");
+
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+          );
+          elements.forEach((el) => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          });
+        } else {
+          // Hide previous spreads
+          spread.style.opacity = "0";
+          spread.style.visibility = "hidden";
+          spread.style.transform = "translateY(-100%)";
+          spread.classList.remove("features__spread--visible");
+        }
+      });
+
+      ticking = false;
+      return;
+    }
+
+    if (scrollTop < featuresStartTrigger) {
+      // Before features section - reset everything
+      isCompleted = false;
+      featuresSection.classList.remove("features--completed");
+
       spreads.forEach((spread) => {
+        spread.style.position = "fixed";
+        spread.style.top = "0";
+        spread.style.bottom = "auto";
         spread.style.opacity = "0";
         spread.style.visibility = "hidden";
         spread.style.transform = "translateY(100%)";
@@ -162,82 +183,99 @@ function initFeaturesSliding() {
       return;
     }
 
-    const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
-    const scrollProgress = Math.max(
-      0,
-      Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
-    );
+    if (isCompleted && scrollDirection === "up" && inFeaturesSection) {
+      // Re-entering features section from below - reset completed state and positioning
+      isCompleted = false;
+      featuresSection.classList.remove("features--completed");
 
-    spreads.forEach((spread, index) => {
-      const cardStartProgress = index * 0.2; // 5 cards, so 0.2 each
-      const cardCompleteProgress = cardStartProgress + 0.15;
-      const nextCardStartProgress = (index + 1) * 0.2;
+      // Reset all spreads back to fixed positioning
+      spreads.forEach((spread) => {
+        spread.style.position = "fixed";
+        spread.style.top = "0";
+        spread.style.bottom = "auto";
+      });
+    }
 
-      if (
-        scrollProgress >= cardStartProgress &&
-        (index === spreads.length - 1 || scrollProgress < nextCardStartProgress)
-      ) {
-        const cardProgress = Math.max(
-          0,
-          Math.min(
-            1,
-            (scrollProgress - cardStartProgress) /
-              (cardCompleteProgress - cardStartProgress)
-          )
-        );
+    if (inFeaturesSection && !isCompleted) {
+      // Active features section - handle progressive reveal
+      const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
+      const scrollProgress = Math.max(
+        0,
+        Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
+      );
 
-        const translateY = (1 - cardProgress) * 100;
-        spread.style.transform = `translateY(${translateY}%)`;
-        spread.style.opacity = "1";
-        spread.style.visibility = "visible";
-        spread.classList.add("features__spread--visible");
+      spreads.forEach((spread, index) => {
+        const cardStartProgress = index * 0.2; // 5 cards, so 0.2 each
+        const cardCompleteProgress = cardStartProgress + 0.15;
+        const nextCardStartProgress = (index + 1) * 0.2;
 
-        const elements = spread.querySelectorAll(
-          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-        );
+        if (
+          scrollProgress >= cardStartProgress &&
+          (index === spreads.length - 1 ||
+            scrollProgress < nextCardStartProgress)
+        ) {
+          const cardProgress = Math.max(
+            0,
+            Math.min(
+              1,
+              (scrollProgress - cardStartProgress) /
+                (cardCompleteProgress - cardStartProgress)
+            )
+          );
 
-        if (cardProgress > 0.3) {
-          elements.forEach((el, elIndex) => {
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
-            el.style.transitionDelay = `${elIndex * 0.1}s`;
-          });
-        } else {
+          const translateY = (1 - cardProgress) * 100;
+          spread.style.transform = `translateY(${translateY}%)`;
+          spread.style.opacity = "1";
+          spread.style.visibility = "visible";
+          spread.classList.add("features__spread--visible");
+
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+          );
+
+          if (cardProgress > 0.3) {
+            elements.forEach((el, elIndex) => {
+              el.style.opacity = "1";
+              el.style.transform = "translateY(0)";
+              el.style.transitionDelay = `${elIndex * 0.1}s`;
+            });
+          } else {
+            elements.forEach((el) => {
+              el.style.opacity = "0";
+              el.style.transform = "translateY(50px)";
+              el.style.transitionDelay = "0s";
+            });
+          }
+        } else if (scrollProgress < cardStartProgress) {
+          spread.style.transform = "translateY(100%)";
+          spread.style.opacity = "0";
+          spread.style.visibility = "hidden";
+          spread.classList.remove("features__spread--visible");
+
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+          );
           elements.forEach((el) => {
             el.style.opacity = "0";
             el.style.transform = "translateY(50px)";
             el.style.transitionDelay = "0s";
           });
+        } else if (scrollProgress >= cardCompleteProgress) {
+          spread.style.transform = "translateY(0)";
+          spread.style.opacity = "1";
+          spread.style.visibility = "visible";
+          spread.classList.add("features__spread--visible");
+
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+          );
+          elements.forEach((el) => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          });
         }
-      } else if (scrollProgress < cardStartProgress) {
-        spread.style.transform = "translateY(100%)";
-        spread.style.opacity = "0";
-        spread.style.visibility = "hidden";
-        spread.classList.remove("features__spread--visible");
-
-        const elements = spread.querySelectorAll(
-          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-        );
-        elements.forEach((el) => {
-          el.style.opacity = "0";
-          el.style.transform = "translateY(50px)";
-          el.style.transitionDelay = "0s";
-        });
-      } else if (scrollProgress >= cardCompleteProgress) {
-        spread.style.transform = "translateY(0)";
-        spread.style.opacity = "1";
-        spread.style.visibility = "visible";
-        spread.classList.add("features__spread--visible");
-
-        const elements = spread.querySelectorAll(
-          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-        );
-        elements.forEach((el) => {
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
-        });
-      }
-    });
+      });
+    }
 
     ticking = false;
   }
@@ -251,6 +289,7 @@ function initFeaturesSliding() {
 
   window.addEventListener("scroll", requestScrollUpdate, { passive: true });
 
+  // Initialize element transitions
   spreads.forEach((spread) => {
     const elements = spread.querySelectorAll(
       ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
