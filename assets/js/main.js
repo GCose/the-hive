@@ -393,107 +393,74 @@ function initSpacesHorizontal() {
   const slides = document.querySelectorAll(".spaces__slide");
   const scrollArea = document.querySelector(".spaces__scroll-area");
 
-  // Calculate total width based on slides
   const totalSlides = slides.length;
-  const slideWidth = window.innerWidth; // Each slide is 100vw
+  const slideWidth = window.innerWidth;
   const totalWidth = slideWidth * totalSlides;
 
-  // Set wrapper width to accommodate all slides
+  // Set wrapper width
   spacesWrapper.style.width = `${totalWidth}px`;
 
-  // Set scroll area height based on number of slides and desired scroll speed
-  const scrollMultiplier = 1.2;
-  scrollArea.style.height = `${totalSlides * 100 * scrollMultiplier}vh`;
+  // Each slide gets 100vh of scroll space
+  scrollArea.style.height = `${totalSlides * 100}vh`;
 
   let isFixed = false;
   let isCompleted = false;
-  let lastScrollTop = 0; // Track last scroll position for direction detection
+  let lastScrollTop = 0;
 
-  // Track if we're actually scrolling
-  let isScrolling = false;
-  let scrollTimeout;
-
-  // Update values on resize
   function updateDimensions() {
     const newSlideWidth = window.innerWidth;
     const newTotalWidth = newSlideWidth * totalSlides;
-
     spacesWrapper.style.width = `${newTotalWidth}px`;
-
-    // If we're currently in the fixed state, update the transform
-    if (isFixed && !isCompleted) {
-      const scrollTop = window.pageYOffset;
-      const sectionTop = spacesSection.offsetTop;
-      const scrollableHeight = scrollArea.offsetHeight;
-
-      const scrollProgress = (scrollTop - sectionTop) / scrollableHeight;
-      const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-      const transformX = -clampedProgress * (newTotalWidth - newSlideWidth);
-
-      spacesWrapper.style.transform = `translateX(${transformX}px)`;
-    }
   }
 
-  // Handle scroll event
   function handleScroll() {
     const scrollTop = window.pageYOffset;
     const sectionTop = spacesSection.offsetTop;
     const sectionHeight = spacesSection.offsetHeight;
     const viewportHeight = window.innerHeight;
-    const scrollableHeight = scrollArea.offsetHeight;
-
-    // Determine scroll direction
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
 
-    const bufferHeight = viewportHeight * 0.5;
-    const isInSectionRange =
-      (scrollDirection === "down" &&
-        scrollTop >= sectionTop &&
-        scrollTop <= sectionTop + sectionHeight - viewportHeight) ||
-      (scrollDirection === "up" &&
-        scrollTop >= sectionTop - bufferHeight &&
-        scrollTop <= sectionTop + sectionHeight - viewportHeight);
+    // Simple range: when we're in the spaces section
+    const sectionStart = sectionTop;
+    const sectionEnd = sectionTop + sectionHeight - viewportHeight;
+    const isInSection = scrollTop >= sectionStart && scrollTop <= sectionEnd;
 
-    if (isInSectionRange) {
-      // Fix the wrapper when we're in the section
+    if (isInSection) {
       if (!isFixed) {
         isFixed = true;
         spacesSection.classList.add("is-fixed");
       }
 
-      const scrollProgress = Math.max(
-        0,
-        (scrollTop - sectionTop) / scrollableHeight
-      );
+      // Calculate how far we've scrolled through the section
+      const scrollIntoSection = scrollTop - sectionStart;
+      const maxScroll = sectionEnd - sectionStart;
+      const scrollProgress = scrollIntoSection / maxScroll;
       const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-      const transformX = -clampedProgress * (totalWidth - slideWidth);
 
-      // Apply the translation with smooth easing
+      // Move wrapper: when progress = 1, we should have moved (totalSlides - 1) slides
+      const maxTransform = (totalSlides - 1) * slideWidth;
+      const transformX = -clampedProgress * maxTransform;
+
       requestAnimationFrame(() => {
         spacesWrapper.style.transform = `translateX(${transformX}px)`;
       });
 
-      // Reset completed state if we're scrolling back up
       if (scrollDirection === "up" && isCompleted) {
         isCompleted = false;
         spacesSection.classList.remove("completed");
       }
-    } else if (
-      scrollTop <
-      sectionTop - (scrollDirection === "up" ? bufferHeight : 0)
-    ) {
+    } else if (scrollTop < sectionStart) {
+      // Before section
       if (isFixed) {
         isFixed = false;
         isCompleted = false;
         spacesSection.classList.remove("is-fixed", "completed");
-
-        // Smooth transition back to start position
         requestAnimationFrame(() => {
           spacesWrapper.style.transform = "translateX(0)";
         });
       }
-    } else if (scrollTop > sectionTop + sectionHeight - viewportHeight) {
-      // Mark as completed when we've scrolled past, but don't force transform
+    } else if (scrollTop > sectionEnd) {
+      // After section - mark as completed
       if (isFixed && !isCompleted) {
         isFixed = false;
         isCompleted = true;
@@ -502,21 +469,13 @@ function initSpacesHorizontal() {
       }
     }
 
-    // Store last scroll position for direction detection
     lastScrollTop = scrollTop;
-
-    // Reset scrolling flag after a delay
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      isScrolling = false;
-    }, 100);
   }
 
   let ticking = false;
   window.addEventListener(
     "scroll",
     () => {
-      isScrolling = true;
       if (!ticking) {
         requestAnimationFrame(() => {
           handleScroll();
@@ -528,22 +487,16 @@ function initSpacesHorizontal() {
     { passive: true }
   );
 
-  let resizeTimeout;
   window.addEventListener(
     "resize",
     () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        updateDimensions();
-      }, 100);
+      updateDimensions();
     },
     { passive: true }
   );
-  updateDimensions();
 
-  setTimeout(() => {
-    handleScroll();
-  }, 100);
+  updateDimensions();
+  setTimeout(handleScroll, 100);
 }
 
 /**=============================================
@@ -552,220 +505,173 @@ function initSpacesHorizontal() {
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Create a master timeline for coordinated animations
-  const masterTL = gsap.timeline({ paused: true });
-
-  // Hero section - more connected entrance
-  const heroTL = gsap.timeline();
-  
-  heroTL
-    .to(".hero__background img", {
-      scale: 1,
-      duration: 2.5,
-      ease: "power3.out"
-    })
-    .from(".hero__title", {
-      y: 100,
-      opacity: 0,
-      duration: 1.8,
-      ease: "power4.out"
-    }, "-=1.8")
-    .from(".hero__caption", {
-      x: 80,
-      opacity: 0,
-      duration: 1.6,
-      ease: "power3.out"
-    }, "-=1.2")
-    .from(".hero__menu", {
-      y: 50,
-      opacity: 0,
-      duration: 1.2,
-      ease: "back.out(1.7)"
-    }, "-=0.8");
-
-  // Why section - orchestrated sequence
-  ScrollTrigger.create({
-    trigger: ".why__header",
-    start: "top 85%",
-    onEnter: () => {
-      const whyTL = gsap.timeline();
-      
-      whyTL
-        .from(".why__chapter-number", {
-          scale: 0.3,
-          rotation: -180,
-          opacity: 0,
-          duration: 1.5,
-          ease: "back.out(1.7)"
-        })
-        .from(".why__chapter-info", {
-          x: -50,
-          opacity: 0,
-          duration: 1.2,
-          ease: "power3.out"
-        }, "-=1")
-        .from(".why__headline", {
-          y: 60,
-          opacity: 0,
-          duration: 1.4,
-          ease: "power3.out"
-        }, "-=0.6")
-        .from(".why__byline span", {
-          y: 20,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "power2.out"
-        }, "-=0.8");
-    }
+  // Hero section animations
+  gsap.to(".hero__bg-image", {
+    scale: 1,
+    duration: 2,
+    ease: "power2.out",
   });
 
-  // Why content - flowing sequence
-  ScrollTrigger.create({
-    trigger: ".why__editorial",
-    start: "top 80%",
-    onEnter: () => {
-      const contentTL = gsap.timeline();
-      
-      contentTL
-        .from(".why__column--primary p", {
-          y: 30,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.15,
-          ease: "power2.out"
-        })
-        .from(".why__pullquote", {
-          scale: 0.9,
-          y: 40,
-          opacity: 0,
-          duration: 1.2,
-          ease: "back.out(1.7)"
-        }, "-=0.5")
-        .from(".why__stat", {
-          y: 25,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.12,
-          ease: "power2.out"
-        }, "-=0.6")
-        .from(".why__feature-image", {
-          scale: 1.1,
-          opacity: 0,
-          duration: 1.5,
-          ease: "power3.out"
-        }, "-=1")
-        .from(".why__caption", {
-          y: 30,
-          opacity: 0,
-          duration: 1,
-          ease: "power2.out"
-        }, "-=0.5");
-    }
+  gsap.from(".hero__title", {
+    y: 50,
+    opacity: 0,
+    duration: 1,
+    delay: 0.5,
+    ease: "power3.out",
   });
 
-  // Enhanced parallax with smoother performance
-  gsap.utils.toArray("[data-parallax]").forEach(element => {
-    const speed = element.dataset.parallax || -50;
-    gsap.to(element, {
-      yPercent: speed,
-      ease: "none",
+  gsap.from(".hero__caption", {
+    x: 50,
+    opacity: 0,
+    duration: 1,
+    delay: 0.5,
+    ease: "power3.out",
+  });
+
+  // Chapter header animation
+  gsap.from(".why__chapter-number", {
+    scrollTrigger: {
+      trigger: ".why__header",
+      start: "top 80%",
+    },
+    scale: 0.5,
+    opacity: 0,
+    duration: 5,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__chapter-info", {
+    scrollTrigger: {
+      trigger: ".why__header",
+      start: "top 80%",
+    },
+    x: -30,
+    opacity: 0,
+    duration: 4,
+    delay: 0.3,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__headline", {
+    scrollTrigger: {
+      trigger: ".why__lead-content",
+      start: "top 80%",
+    },
+    y: 50,
+    opacity: 0,
+    duration: 5,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__byline", {
+    scrollTrigger: {
+      trigger: ".why__lead-content",
+      start: "top 80%",
+    },
+    y: 30,
+    opacity: 0,
+    duration: 3,
+    delay: 0.2,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__column--primary", {
+    scrollTrigger: {
+      trigger: ".why__columns",
+      start: "top 80%",
+    },
+    x: -50,
+    opacity: 0,
+    duration: 6,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__pullquote", {
+    scrollTrigger: {
+      trigger: ".why__column--secondary",
+      start: "top 80%",
+    },
+    y: 30,
+    opacity: 0,
+    duration: 1,
+    delay: 0.8,
+    ease: "power3.out",
+  });
+
+  // Stats animation with stagger
+  gsap.from(".why__stat", {
+    scrollTrigger: {
+      trigger: ".why__stats",
+      start: "top 80%",
+    },
+    y: 20,
+    opacity: 0,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: "power3.out",
+  });
+
+  // Feature image animation
+  gsap.from(".why__feature-image img", {
+    scrollTrigger: {
+      trigger: ".why__feature-image",
+      start: "top 80%",
+    },
+    scale: 1.1,
+    duration: 1,
+    ease: "power3.out",
+  });
+
+  gsap.from(".why__caption", {
+    scrollTrigger: {
+      trigger: ".why__feature-image",
+      start: "top 80%",
+    },
+    y: 30,
+    opacity: 0,
+    duration: 1,
+    delay: 0.5,
+    ease: "power3.out",
+  });
+
+  // Parallax effect for about image
+  gsap.to(".about__image-parallax", {
+    scrollTrigger: {
+      trigger: ".about__image",
+      start: "top bottom",
+      end: "bottom top",
+      scrub: true,
+    },
+    y: -100,
+    ease: "none",
+  });
+
+  // Each space item animation
+  document.querySelectorAll(".spaces__item").forEach((item) => {
+    // Content animation
+    gsap.from(item.querySelector(".spaces__item-content"), {
       scrollTrigger: {
-        trigger: element,
+        trigger: item,
+        start: "top 70%",
+      },
+      x: item.classList.contains("spaces__item:nth-child(even)") ? 50 : -50,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out",
+    });
+
+    // Parallax effect for spaces images
+    gsap.to(item.querySelector(".spaces__parallax"), {
+      scrollTrigger: {
+        trigger: item,
         start: "top bottom",
         end: "bottom top",
-        scrub: 1.5,
-        refreshPriority: -1
-      }
+        scrub: true,
+      },
+      y: -100,
+      ease: "none",
     });
   });
-
-  // Community section - wave animation
-  ScrollTrigger.create({
-    trigger: ".community",
-    start: "top 75%",
-    onEnter: () => {
-      gsap.from(".community__item", {
-        y: 80,
-        opacity: 0,
-        duration: 1.2,
-        stagger: {
-          amount: 0.6,
-          from: "start",
-          ease: "power2.out"
-        },
-        ease: "back.out(1.7)"
-      });
-      
-      gsap.from(".community__quote", {
-        scale: 0.8,
-        opacity: 0,
-        duration: 1.5,
-        delay: 0.8,
-        ease: "elastic.out(1, 0.8)"
-      });
-    }
-  });
-
-  // Sustainability section - connected reveal
-  ScrollTrigger.create({
-    trigger: ".sustainability",
-    start: "top 70%",
-    onEnter: () => {
-      const sustainTL = gsap.timeline();
-      
-      sustainTL
-        .from(".sustainability__heading", {
-          y: 50,
-          opacity: 0,
-          duration: 1.2,
-          ease: "power3.out"
-        })
-        .from(".sustainability__text", {
-          x: -60,
-          opacity: 0,
-          duration: 1.4,
-          ease: "power3.out"
-        }, "-=0.6")
-        .from(".sustainability__features li", {
-          x: -30,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "power2.out"
-        }, "-=0.8")
-        .from(".sustainability__image", {
-          scale: 1.1,
-          opacity: 0,
-          duration: 1.6,
-          ease: "power3.out"
-        }, "-=1.2");
-    }
-  });
-
-  // Vision section - dramatic entrance
-  ScrollTrigger.create({
-    trigger: ".vision",
-    start: "top 80%",
-    onEnter: () => {
-      gsap.from(".vision__content", {
-        scale: 0.9,
-        y: 100,
-        opacity: 0,
-        duration: 2,
-        ease: "power4.out"
-      });
-    }
-  });
-
-  // Smooth scroll performance optimization
-  ScrollTrigger.config({
-    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-    ignoreMobileResize: true
-  });
-
-  // Start the master timeline
-  masterTL.play();
 }
 
 /**=========================================
