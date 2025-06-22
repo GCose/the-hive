@@ -328,60 +328,6 @@ function initFeaturesSliding() {
   updateSpreadsOnScroll();
 }
 
-/**=====================================================
- * Function that handles GSAP animations for features.
- ======================================================*/
-function initFeaturesGSAP() {
-  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
-    return;
-  }
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  document.querySelectorAll(".features__spread").forEach((spread) => {
-    gsap.to(spread, {
-      backgroundPosition: "50% 20%",
-      ease: "none",
-      scrollTrigger: {
-        trigger: spread,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-      },
-    });
-
-    const quote = spread.querySelector(".features__spread-quote");
-    if (quote) {
-      gsap.fromTo(
-        quote,
-        { scale: 0.98 },
-        {
-          scale: 1,
-          duration: 1.5,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: quote,
-            start: "top 80%",
-            end: "top 50%",
-            scrub: 1,
-          },
-        }
-      );
-    }
-  });
-}
-
-/**=======================================================
- * Function that initializes all features functionality
- ========================================================*/
-function initFeatures() {
-  initFeaturesSliding();
-
-  if (typeof gsap !== "undefined") {
-    initFeaturesGSAP();
-  }
-}
-
 /**==================================================================
  * Function that handles horizontal scroll based on vertical scroll
  ===================================================================*/
@@ -622,16 +568,36 @@ function initAnimations() {
     ease: "power3.out",
   });
 
-  // Parallax effect for about image
-  gsap.to(".about__image-parallax", {
-    scrollTrigger: {
-      trigger: ".about__image",
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true,
-    },
-    y: -100,
-    ease: "none",
+  document.querySelectorAll(".features__spread").forEach((spread) => {
+    gsap.to(spread, {
+      backgroundPosition: "50% 20%",
+      ease: "none",
+      scrollTrigger: {
+        trigger: spread,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1,
+      },
+    });
+
+    const quote = spread.querySelector(".features__spread-quote");
+    if (quote) {
+      gsap.fromTo(
+        quote,
+        { scale: 0.98 },
+        {
+          scale: 1,
+          duration: 1.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: quote,
+            start: "top 80%",
+            end: "top 50%",
+            scrub: 1,
+          },
+        }
+      );
+    }
   });
 
   // Each space item animation
@@ -668,7 +634,7 @@ function initAnimations() {
 function init() {
   initLoader();
   initMenuToggle();
-  initFeatures();
+  initFeaturesSliding();
   initSpacesHorizontal();
 }
 
