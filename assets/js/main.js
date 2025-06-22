@@ -1,6 +1,6 @@
-/**===============================
+/**=========================================
  * Function that handles loading animation
- ================================*/
+ ==========================================*/
 function initLoader() {
   const loader = document.querySelector(".loader");
   const progressBar = document.querySelector(".loader__progress-bar");
@@ -552,173 +552,220 @@ function initSpacesHorizontal() {
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Hero section animations
-  gsap.to(".hero__bg-image", {
-    scale: 1,
-    duration: 2,
-    ease: "power2.out",
-  });
+  // Create a master timeline for coordinated animations
+  const masterTL = gsap.timeline({ paused: true });
 
-  gsap.from(".hero__title", {
-    y: 50,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".hero__caption", {
-    x: 50,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  // Chapter header animation
-  gsap.from(".why__chapter-number", {
-    scrollTrigger: {
-      trigger: ".why__header",
-      start: "top 80%",
-    },
-    scale: 0.5,
-    opacity: 0,
-    duration: 5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__chapter-info", {
-    scrollTrigger: {
-      trigger: ".why__header",
-      start: "top 80%",
-    },
-    x: -30,
-    opacity: 0,
-    duration: 4,
-    delay: 0.3,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__headline", {
-    scrollTrigger: {
-      trigger: ".why__lead-content",
-      start: "top 80%",
-    },
-    y: 50,
-    opacity: 0,
-    duration: 5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__byline", {
-    scrollTrigger: {
-      trigger: ".why__lead-content",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 3,
-    delay: 0.2,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__column--primary", {
-    scrollTrigger: {
-      trigger: ".why__columns",
-      start: "top 80%",
-    },
-    x: -50,
-    opacity: 0,
-    duration: 6,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__pullquote", {
-    scrollTrigger: {
-      trigger: ".why__column--secondary",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 1,
-    delay: 0.8,
-    ease: "power3.out",
-  });
-
-  // Stats animation with stagger
-  gsap.from(".why__stat", {
-    scrollTrigger: {
-      trigger: ".why__stats",
-      start: "top 80%",
-    },
-    y: 20,
-    opacity: 0,
-    duration: 0.8,
-    stagger: 0.1,
-    ease: "power3.out",
-  });
-
-  // Feature image animation
-  gsap.from(".why__feature-image img", {
-    scrollTrigger: {
-      trigger: ".why__feature-image",
-      start: "top 80%",
-    },
-    scale: 1.1,
-    duration: 1,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__caption", {
-    scrollTrigger: {
-      trigger: ".why__feature-image",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  // Parallax effect for about image
-  gsap.to(".about__image-parallax", {
-    scrollTrigger: {
-      trigger: ".about__image",
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true,
-    },
-    y: -100,
-    ease: "none",
-  });
-
-  // Each space item animation
-  document.querySelectorAll(".spaces__item").forEach((item) => {
-    // Content animation
-    gsap.from(item.querySelector(".spaces__item-content"), {
-      scrollTrigger: {
-        trigger: item,
-        start: "top 70%",
-      },
-      x: item.classList.contains("spaces__item:nth-child(even)") ? 50 : -50,
+  // Hero section - more connected entrance
+  const heroTL = gsap.timeline();
+  
+  heroTL
+    .to(".hero__background img", {
+      scale: 1,
+      duration: 2.5,
+      ease: "power3.out"
+    })
+    .from(".hero__title", {
+      y: 100,
       opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-    });
+      duration: 1.8,
+      ease: "power4.out"
+    }, "-=1.8")
+    .from(".hero__caption", {
+      x: 80,
+      opacity: 0,
+      duration: 1.6,
+      ease: "power3.out"
+    }, "-=1.2")
+    .from(".hero__menu", {
+      y: 50,
+      opacity: 0,
+      duration: 1.2,
+      ease: "back.out(1.7)"
+    }, "-=0.8");
 
-    // Parallax effect for spaces images
-    gsap.to(item.querySelector(".spaces__parallax"), {
+  // Why section - orchestrated sequence
+  ScrollTrigger.create({
+    trigger: ".why__header",
+    start: "top 85%",
+    onEnter: () => {
+      const whyTL = gsap.timeline();
+      
+      whyTL
+        .from(".why__chapter-number", {
+          scale: 0.3,
+          rotation: -180,
+          opacity: 0,
+          duration: 1.5,
+          ease: "back.out(1.7)"
+        })
+        .from(".why__chapter-info", {
+          x: -50,
+          opacity: 0,
+          duration: 1.2,
+          ease: "power3.out"
+        }, "-=1")
+        .from(".why__headline", {
+          y: 60,
+          opacity: 0,
+          duration: 1.4,
+          ease: "power3.out"
+        }, "-=0.6")
+        .from(".why__byline span", {
+          y: 20,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out"
+        }, "-=0.8");
+    }
+  });
+
+  // Why content - flowing sequence
+  ScrollTrigger.create({
+    trigger: ".why__editorial",
+    start: "top 80%",
+    onEnter: () => {
+      const contentTL = gsap.timeline();
+      
+      contentTL
+        .from(".why__column--primary p", {
+          y: 30,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power2.out"
+        })
+        .from(".why__pullquote", {
+          scale: 0.9,
+          y: 40,
+          opacity: 0,
+          duration: 1.2,
+          ease: "back.out(1.7)"
+        }, "-=0.5")
+        .from(".why__stat", {
+          y: 25,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: "power2.out"
+        }, "-=0.6")
+        .from(".why__feature-image", {
+          scale: 1.1,
+          opacity: 0,
+          duration: 1.5,
+          ease: "power3.out"
+        }, "-=1")
+        .from(".why__caption", {
+          y: 30,
+          opacity: 0,
+          duration: 1,
+          ease: "power2.out"
+        }, "-=0.5");
+    }
+  });
+
+  // Enhanced parallax with smoother performance
+  gsap.utils.toArray("[data-parallax]").forEach(element => {
+    const speed = element.dataset.parallax || -50;
+    gsap.to(element, {
+      yPercent: speed,
+      ease: "none",
       scrollTrigger: {
-        trigger: item,
+        trigger: element,
         start: "top bottom",
         end: "bottom top",
-        scrub: true,
-      },
-      y: -100,
-      ease: "none",
+        scrub: 1.5,
+        refreshPriority: -1
+      }
     });
   });
+
+  // Community section - wave animation
+  ScrollTrigger.create({
+    trigger: ".community",
+    start: "top 75%",
+    onEnter: () => {
+      gsap.from(".community__item", {
+        y: 80,
+        opacity: 0,
+        duration: 1.2,
+        stagger: {
+          amount: 0.6,
+          from: "start",
+          ease: "power2.out"
+        },
+        ease: "back.out(1.7)"
+      });
+      
+      gsap.from(".community__quote", {
+        scale: 0.8,
+        opacity: 0,
+        duration: 1.5,
+        delay: 0.8,
+        ease: "elastic.out(1, 0.8)"
+      });
+    }
+  });
+
+  // Sustainability section - connected reveal
+  ScrollTrigger.create({
+    trigger: ".sustainability",
+    start: "top 70%",
+    onEnter: () => {
+      const sustainTL = gsap.timeline();
+      
+      sustainTL
+        .from(".sustainability__heading", {
+          y: 50,
+          opacity: 0,
+          duration: 1.2,
+          ease: "power3.out"
+        })
+        .from(".sustainability__text", {
+          x: -60,
+          opacity: 0,
+          duration: 1.4,
+          ease: "power3.out"
+        }, "-=0.6")
+        .from(".sustainability__features li", {
+          x: -30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out"
+        }, "-=0.8")
+        .from(".sustainability__image", {
+          scale: 1.1,
+          opacity: 0,
+          duration: 1.6,
+          ease: "power3.out"
+        }, "-=1.2");
+    }
+  });
+
+  // Vision section - dramatic entrance
+  ScrollTrigger.create({
+    trigger: ".vision",
+    start: "top 80%",
+    onEnter: () => {
+      gsap.from(".vision__content", {
+        scale: 0.9,
+        y: 100,
+        opacity: 0,
+        duration: 2,
+        ease: "power4.out"
+      });
+    }
+  });
+
+  // Smooth scroll performance optimization
+  ScrollTrigger.config({
+    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+    ignoreMobileResize: true
+  });
+
+  // Start the master timeline
+  masterTL.play();
 }
 
 /**=========================================

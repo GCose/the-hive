@@ -185,22 +185,31 @@ section {
 }
 
 .loader__content {
-  gap: 2rem;
   display: flex;
+  max-width: 90vw;
+  max-height: 90vh;
   align-items: center;
   flex-direction: column;
   justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
 }
 
 .loader__logo {
-  width: 70rem;
+  max-height: 40vh;
+  width: clamp(12rem, 25vw, 35rem);
+}
+
+.loader__logo img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .loader__progress {
-  width: 30rem;
   height: 10px;
   overflow: hidden;
   border-radius: 20px;
+  width: clamp(20rem, 35vw, 30rem);
   background-color: var(--color-gray-light);
 }
 
@@ -213,8 +222,8 @@ section {
 
 .loader__text {
   font-weight: 500;
-  font-size: 1.6rem;
   color: var(--color-primary);
+  font-size: clamp(1.4rem, 2.5vw, 1.6rem);
 }
 
 .loader--hidden {
@@ -226,12 +235,8 @@ section {
  * BREAKPOINT STYLES
  =====================*/
 @media screen and (max-width: 768px) {
-  .loader__logo {
-    width: 12rem;
-  }
-
-  .loader__progress {
-    width: 25rem;
+  .loader__content {
+    gap: clamp(1rem, 3vh, 2rem);
   }
 }
 
