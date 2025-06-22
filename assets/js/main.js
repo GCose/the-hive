@@ -394,24 +394,22 @@ function initSpacesHorizontal() {
   const scrollArea = document.querySelector(".spaces__scroll-area");
 
   const totalSlides = slides.length;
-  const slideWidth = window.innerWidth;
-  const totalWidth = slideWidth * totalSlides;
 
-  // Set wrapper width
-  spacesWrapper.style.width = `${totalWidth}px`;
+  function updateDimensions() {
+    const slideWidth = window.innerWidth;
+    const totalWidth = slideWidth * totalSlides;
+    spacesWrapper.style.width = `${totalWidth}px`;
 
-  // Each slide gets 100vh of scroll space
-  scrollArea.style.height = `${totalSlides * 100}vh`;
+    const transformDistance = (totalSlides - 1) * slideWidth;
+    const viewportEquivalent = transformDistance / slideWidth; // How many "screens"
+    const scrollHeight = (viewportEquivalent + 1) * 100; // +1 for the section itself
+
+    scrollArea.style.height = `${scrollHeight}vh`;
+  }
 
   let isFixed = false;
   let isCompleted = false;
   let lastScrollTop = 0;
-
-  function updateDimensions() {
-    const newSlideWidth = window.innerWidth;
-    const newTotalWidth = newSlideWidth * totalSlides;
-    spacesWrapper.style.width = `${newTotalWidth}px`;
-  }
 
   function handleScroll() {
     const scrollTop = window.pageYOffset;
@@ -420,7 +418,6 @@ function initSpacesHorizontal() {
     const viewportHeight = window.innerHeight;
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
 
-    // Simple range: when we're in the spaces section
     const sectionStart = sectionTop;
     const sectionEnd = sectionTop + sectionHeight - viewportHeight;
     const isInSection = scrollTop >= sectionStart && scrollTop <= sectionEnd;
@@ -431,13 +428,12 @@ function initSpacesHorizontal() {
         spacesSection.classList.add("is-fixed");
       }
 
-      // Calculate how far we've scrolled through the section
       const scrollIntoSection = scrollTop - sectionStart;
       const maxScroll = sectionEnd - sectionStart;
       const scrollProgress = scrollIntoSection / maxScroll;
       const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
 
-      // Move wrapper: when progress = 1, we should have moved (totalSlides - 1) slides
+      const slideWidth = window.innerWidth;
       const maxTransform = (totalSlides - 1) * slideWidth;
       const transformX = -clampedProgress * maxTransform;
 
@@ -450,7 +446,6 @@ function initSpacesHorizontal() {
         spacesSection.classList.remove("completed");
       }
     } else if (scrollTop < sectionStart) {
-      // Before section
       if (isFixed) {
         isFixed = false;
         isCompleted = false;
@@ -460,7 +455,6 @@ function initSpacesHorizontal() {
         });
       }
     } else if (scrollTop > sectionEnd) {
-      // After section - mark as completed
       if (isFixed && !isCompleted) {
         isFixed = false;
         isCompleted = true;
@@ -487,13 +481,7 @@ function initSpacesHorizontal() {
     { passive: true }
   );
 
-  window.addEventListener(
-    "resize",
-    () => {
-      updateDimensions();
-    },
-    { passive: true }
-  );
+  window.addEventListener("resize", updateDimensions, { passive: true });
 
   updateDimensions();
   setTimeout(handleScroll, 100);
