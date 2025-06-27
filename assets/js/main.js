@@ -95,7 +95,7 @@ function initFeaturesSliding() {
     const featuresHeaderBottom = featuresContainer
       ? featuresTop + featuresContainer.offsetHeight
       : featuresTop;
-    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
+    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.5;
     const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
 
     // Determine scroll direction
@@ -109,7 +109,7 @@ function initFeaturesSliding() {
     const hasCompletedFeatures = scrollTop > featuresEndTrigger;
 
     if (hasCompletedFeatures && !isCompleted) {
-      // Mark as completed - transition to static positioning like spaces section
+      // Mark as completed - transition to static positioning
       isCompleted = true;
 
       featuresSection.classList.add("features--completed");
@@ -413,313 +413,37 @@ function initSpacesHorizontal() {
   setTimeout(handleScroll, 100);
 }
 
-/**===========================================================
- * Function that handles community card swapping animation
- ============================================================*/
-function initCommunitySlideshow() {
-  const communitySection = document.querySelector(".community");
-  const wrapper = document.querySelector(".community__wrapper");
-  const leftCard = document.getElementById("leftCard");
-  const rightCard = document.getElementById("rightCard");
-  const scrollArea = document.querySelector(".community__scroll-area");
-
-  if (!communitySection || !wrapper || !leftCard || !rightCard || !scrollArea)
-    return;
-
-  // Slide data
-  const slides = [
-    {
-      tag: "Growth",
-      title: "For Startups & SMEs",
-      description:
-        "A space that energizes you, supports you, and grows with you. Finally — a headquarters that matches your ambition in The Gambia.",
-      image: "assets/images/community-1.jpg",
-      alt: "Startups & SMEs workspace",
-      number: "01",
-    },
-    {
-      tag: "Global",
-      title: "For Embassies & NGOs",
-      description:
-        "A globally-aligned, security-conscious building that reflects your values and supports diplomatic missions.",
-      image: "assets/images/community-2.jpg",
-      alt: "Embassy & NGO spaces",
-      number: "02",
-    },
-    {
-      tag: "Creative",
-      title: "For Creatives & Freelancers",
-      description:
-        "Inspiration meets affordability in a setting that respects your craft and fuels your creativity.",
-      image: "assets/images/community-3.jpg",
-      alt: "Creative workspace",
-      number: "03",
-    },
-    {
-      tag: "Enterprise",
-      title: "For Regional & International Companies",
-      description:
-        "Make your mark in The Gambia with a prestigious, future-ready headquarters that commands respect.",
-      image: "assets/images/community-4.jpg",
-      alt: "Corporate headquarters",
-      number: "04",
-    },
-  ];
-
-  let currentSlide = 0;
-  let isAnimating = false;
-  let isFixed = false;
-  let isCompleted = false;
-  let lastScrollTop = 0;
-  let ticking = false;
-
-  // Track what type of content is in each position
-  let leftCardHasImage = true; // Initially left has image
-  let rightCardHasImage = false; // Initially right has text
-
-  // Create content elements
-  function createImageContent(slide) {
-    return `<img src="${slide.image}" alt="${slide.alt}" class="community__card-image" />`;
-  }
-
-  function createTextContent(slide) {
-    return `
-      <div class="community__card-text">
-        <span class="community__card-tag">${slide.tag}</span>
-        <h3 class="community__card-title">${slide.title}</h3>
-        <p class="community__card-description">${slide.description}</p>
-        <div class="community__card-number">${slide.number}</div>
-      </div>
-    `;
-  }
-
-  // Swap cards and content
-  function swapCards() {
-    if (isAnimating || currentSlide >= slides.length - 1) return;
-
-    isAnimating = true;
-    const nextSlide = currentSlide + 1;
-
-    // Get current content containers
-    const leftContent = leftCard.querySelector(".community__card-content");
-    const rightContent = rightCard.querySelector(".community__card-content");
-
-    // Start physical card movement
-    leftCard.classList.add("community__card--swapping-left");
-    rightCard.classList.add("community__card--swapping-right");
-
-    // Start content fade out
-    leftContent.classList.add("community__card-content--fading");
-    rightContent.classList.add("community__card-content--fading");
-
-    // After fade out, switch content based on current state
-    setTimeout(() => {
-      if (leftCardHasImage) {
-        // Left card currently has image, give it next slide's text
-        leftContent.innerHTML = createTextContent(slides[nextSlide]);
-        // Right card currently has text, give it next slide's image
-        rightContent.innerHTML = createImageContent(slides[nextSlide]);
-      } else {
-        // Left card currently has text, give it next slide's image
-        leftContent.innerHTML = createImageContent(slides[nextSlide]);
-        // Right card currently has image, give it next slide's text
-        rightContent.innerHTML = createTextContent(slides[nextSlide]);
-      }
-
-      // Toggle the state
-      leftCardHasImage = !leftCardHasImage;
-      rightCardHasImage = !rightCardHasImage;
-
-      // Fade content back in
-      leftContent.classList.remove("community__card-content--fading");
-      rightContent.classList.remove("community__card-content--fading");
-    }, 300); // Half of transition time
-
-    // Complete card swap
-    setTimeout(() => {
-      leftCard.classList.remove("community__card--swapping-left");
-      rightCard.classList.remove("community__card--swapping-right");
-
-      // Update current slide
-      currentSlide = nextSlide;
-      isAnimating = false;
-    }, 1200); // Full transition time
-  }
-
-  function handleCommunityScroll() {
-    const scrollTop = window.pageYOffset;
-    const windowHeight = window.innerHeight;
-    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
-
-    const sectionRect = communitySection.getBoundingClientRect();
-    const sectionTop = scrollTop + sectionRect.top;
-    const sectionHeight = communitySection.offsetHeight;
-    const sectionEnd = sectionTop + sectionHeight - windowHeight;
-
-    // Calculate trigger points
-    const communityContainer = document.querySelector(".community__container");
-    const containerHeight = communityContainer
-      ? communityContainer.offsetHeight
-      : 0;
-    const startTrigger = sectionTop + containerHeight - windowHeight * 0.2;
-    const endTrigger = sectionEnd - windowHeight * 0.3;
-
-    // Check if we're in the active community section
-    const inCommunitySection =
-      scrollTop >= startTrigger && scrollTop <= endTrigger;
-    const hasCompletedCommunity = scrollTop > endTrigger;
-
-    if (hasCompletedCommunity && !isCompleted) {
-      // Completed community section
-      isCompleted = true;
-      isFixed = false;
-
-      wrapper.style.position = "absolute";
-      wrapper.style.top = "auto";
-      wrapper.style.bottom = "0";
-      wrapper.classList.add("community__wrapper--visible");
-
-      ticking = false;
-      return;
-    }
-
-    if (scrollTop < startTrigger) {
-      // Before community section - reset everything
-      isFixed = false;
-      isCompleted = false;
-      currentSlide = 0;
-      isAnimating = false;
-      leftCardHasImage = true;
-      rightCardHasImage = false;
-
-      wrapper.style.position = "fixed";
-      wrapper.style.top = "0";
-      wrapper.style.bottom = "auto";
-      wrapper.classList.remove("community__wrapper--visible");
-
-      // Reset to first slide
-      const leftContent = leftCard.querySelector(".community__card-content");
-      const rightContent = rightCard.querySelector(".community__card-content");
-
-      leftContent.innerHTML = createImageContent(slides[0]);
-      rightContent.innerHTML = createTextContent(slides[0]);
-
-      ticking = false;
-      return;
-    }
-
-    if (isCompleted && scrollDirection === "up" && inCommunitySection) {
-      // Re-entering from below
-      isCompleted = false;
-
-      wrapper.style.position = "fixed";
-      wrapper.style.top = "0";
-      wrapper.style.bottom = "auto";
-    }
-
-    if (inCommunitySection && !isCompleted) {
-      // Active community section
-      if (!isFixed) {
-        isFixed = true;
-        wrapper.style.position = "fixed";
-        wrapper.style.top = "0";
-        wrapper.style.bottom = "auto";
-      }
-
-      // Show wrapper when in section
-      if (!wrapper.classList.contains("community__wrapper--visible")) {
-        wrapper.classList.add("community__wrapper--visible");
-      }
-
-      // Calculate progress through the section (0 to 1)
-      const sectionProgress = Math.max(
-        0,
-        Math.min(1, (scrollTop - startTrigger) / (endTrigger - startTrigger))
-      );
-
-      // Determine when to trigger swaps
-      const totalSlides = slides.length;
-      const slideProgress = sectionProgress * (totalSlides - 1);
-      const targetSlide = Math.floor(slideProgress);
-
-      // Trigger swap if we've progressed to the next slide
-      if (targetSlide > currentSlide && !isAnimating) {
-        swapCards();
-      }
-    }
-
-    lastScrollTop = scrollTop;
-    ticking = false;
-  }
-
-  function requestCommunityUpdate() {
-    if (!ticking) {
-      requestAnimationFrame(handleCommunityScroll);
-      ticking = true;
-    }
-  }
-
-  // Event listeners
-  window.addEventListener("scroll", requestCommunityUpdate, { passive: true });
-  window.addEventListener("resize", requestCommunityUpdate, { passive: true });
-
-  // Initial call
-  setTimeout(handleCommunityScroll, 100);
-}
-
-/**===============================================
- * Function that handles community card animations
- ================================================*/
-function initCommunityAnimations() {
-  const cards = document.querySelectorAll(".community__card");
-
-  if (!cards.length) return;
-
-  // Add intersection observer for performance
-  const observerOptions = {
-    root: null,
-    rootMargin: "0px",
-    threshold: 0.1,
-  };
-
-  const cardObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const images = entry.target.querySelectorAll(".community__card-image");
-        images.forEach((img) => {
-          img.style.transform = "scale(1)";
-        });
-      }
-    });
-  }, observerOptions);
-
-  // Observe cards
-  cards.forEach((card) => {
-    cardObserver.observe(card);
-  });
-}
-
-/**============================================
- * Function that initializes community section
- =============================================*/
-function initCommunity() {
-  initCommunitySlideshow();
-  initCommunityAnimations();
-}
-
 /**=============================================
- *  Function that initializes GSAP animations.
+ * Function that initializes GSAP animations.
  ==============================================*/
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Hero section animations
-  gsap.to(".hero__bg-image", {
-    scale: 1,
-    duration: 2,
-    ease: "power2.out",
+  // Chapter header animation
+  gsap.from(".chapter__chapter-number", {
+    scrollTrigger: {
+      trigger: ".chapter__header",
+      start: "top 80%",
+    },
+    scale: 0.5,
+    opacity: 0,
+    duration: 5,
+    ease: "power3.out",
   });
 
+  gsap.from(".chapter__chapter-info", {
+    scrollTrigger: {
+      trigger: ".chapter__header",
+      start: "top 80%",
+    },
+    x: -30,
+    opacity: 0,
+    duration: 4,
+    delay: 0.3,
+    ease: "power3.out",
+  });
+
+  // Hero section animation
   gsap.from(".hero__title", {
     y: 50,
     opacity: 0,
@@ -733,30 +457,6 @@ function initAnimations() {
     opacity: 0,
     duration: 1,
     delay: 0.5,
-    ease: "power3.out",
-  });
-
-  // Chapter header animation
-  gsap.from(".why__chapter-number", {
-    scrollTrigger: {
-      trigger: ".why__header",
-      start: "top 80%",
-    },
-    scale: 0.5,
-    opacity: 0,
-    duration: 5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__chapter-info", {
-    scrollTrigger: {
-      trigger: ".why__header",
-      start: "top 80%",
-    },
-    x: -30,
-    opacity: 0,
-    duration: 4,
-    delay: 0.3,
     ease: "power3.out",
   });
 
@@ -910,7 +610,6 @@ function init() {
   initMenuToggle();
   initFeaturesSliding();
   initSpacesHorizontal();
-  initCommunity();
 }
 
 document.addEventListener("DOMContentLoaded", init);
