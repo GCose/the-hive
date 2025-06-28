@@ -2234,15 +2234,15 @@ section {
 
 .ready__visit-cta {
   display: flex;
+  height: 16rem;
   font-weight: 600;
-  overflow: hidden;
   position: relative;
   align-items: center;
   text-decoration: none;
   justify-content: center;
-  font-size: clamp(1.6rem, 1.8vw, 1.7rem);
+  padding: clamp(2.5rem, 3vw, 6rem) 0;
+  font-size: clamp(1.6rem, 1.8vw, 1.8rem);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  padding: clamp(2.5rem, 3vw, 3rem) clamp(2rem, 2.5vw, 2.5rem);
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
