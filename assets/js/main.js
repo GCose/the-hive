@@ -426,38 +426,65 @@ function initSpacesHorizontal() {
  * Function that handles scroll animations
  ========================================*/
 function initScrollAnimations() {
-  const observer = new IntersectionObserver(
+  const scrollTextElements = document.querySelectorAll(
+    ".chapter__chapter-title, .features__spread-title, .spaces__slide-title, .spaces__chapter-title"
+  );
+
+  const textObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add("animate-in");
-          observer.unobserve(entry.target);
+          animateTextReveal(entry.target);
+          textObserver.unobserve(entry.target);
         }
       });
     },
-    {
-      threshold: 0.1,
-      rootMargin: "0px 0px -20% 0px",
-    }
+    { threshold: 0.7 }
   );
 
-  const elements = document.querySelectorAll(`
-    .chapter__chapter-number,
-    .chapter__chapter-info,
-    .hero__title,
-    .hero__caption,
-    .why__headline,
-    .why__byline,
-    .why__column--primary,
-    .why__pullquote,
-    .why__stat,
-    .why__feature-image,
-    .why__caption
-  `);
+  scrollTextElements.forEach((el) => textObserver.observe(el));
+}
 
-  elements.forEach((el) => {
-    observer.observe(el);
+/**============================================
+ * Function that handles text reveal animation
+ =============================================*/
+function animateTextReveal(element) {
+  if (element.classList.contains("text-revealed")) return;
+
+  const text = element.textContent;
+  const words = text.split(" ");
+  element.innerHTML = "";
+
+  words.forEach((word, wordIndex) => {
+    const wordSpan = document.createElement("span");
+    wordSpan.style.display = "inline-block";
+    wordSpan.style.overflow = "hidden";
+    wordSpan.style.padding = "0.5rem";
+
+    const letters = word.split("");
+    letters.forEach((letter, letterIndex) => {
+      const letterSpan = document.createElement("span");
+      letterSpan.textContent = letter;
+      letterSpan.style.display = "inline-block";
+      letterSpan.style.transform = "translateY(100%)";
+      letterSpan.style.transition = `transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+      letterSpan.style.transitionDelay = `${
+        wordIndex * 0.1 + letterIndex * 0.05
+      }s`;
+
+      wordSpan.appendChild(letterSpan);
+    });
+
+    element.appendChild(wordSpan);
   });
+
+  setTimeout(() => {
+    element.querySelectorAll("span span").forEach((letter) => {
+      letter.style.transform = "translateY(0)";
+    });
+  }, 100);
+
+  element.classList.add("text-revealed");
 }
 
 /**=========================================
@@ -468,6 +495,7 @@ function init() {
   initMenuToggle();
   initFeaturesSliding();
   initSpacesHorizontal();
+  initScrollAnimations();
 }
 
 document.addEventListener("DOMContentLoaded", init);
