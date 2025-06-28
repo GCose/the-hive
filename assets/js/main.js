@@ -17,7 +17,7 @@ function initLoader() {
       setTimeout(() => {
         loader.classList.add("loader--hidden");
         document.body.style.overflow = "visible";
-        initAnimations();
+        initScrollAnimations();
       }, 500);
     }
   }, 150);
@@ -70,7 +70,6 @@ function initFeaturesSliding() {
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
 
-    // Initialize spreads as hidden relative to features section
     const sectionHeight = featuresSection.offsetHeight;
     spread.style.transform = `translateY(${sectionHeight}px)`;
     spread.style.opacity = "0";
@@ -290,7 +289,6 @@ function initFeaturesSliding() {
   window.addEventListener(
     "resize",
     () => {
-      // Recalculate section height on resize
       spreads.forEach((spread, index) => {
         if (!spread.classList.contains("features__spread--visible")) {
           const sectionHeight = featuresSection.offsetHeight;
@@ -314,7 +312,6 @@ function initFeaturesSliding() {
     });
   });
 
-  // Only call this after a small delay to ensure proper initialization
   setTimeout(() => {
     updateSpreadsOnScroll();
   }, 100);
@@ -425,169 +422,41 @@ function initSpacesHorizontal() {
   setTimeout(handleScroll, 100);
 }
 
-/**=============================================
- * Function that initializes GSAP animations.
- ==============================================*/
-function initAnimations() {
-  gsap.registerPlugin(ScrollTrigger);
-
-  gsap.from(".chapter__chapter-number", {
-    scrollTrigger: {
-      trigger: ".chapter__header",
-      start: "top 80%",
-    },
-    scale: 0.5,
-    opacity: 0,
-    duration: 1.2,
-    ease: "power3.out",
-  });
-
-  gsap.from(".chapter__chapter-info", {
-    scrollTrigger: {
-      trigger: ".chapter__header",
-      start: "top 80%",
-    },
-    x: -30,
-    opacity: 0,
-    duration: 1,
-    delay: 0.3,
-    ease: "power3.out",
-  });
-
-  gsap.from(".hero__title", {
-    y: 50,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".hero__caption", {
-    x: 50,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__headline", {
-    scrollTrigger: {
-      trigger: ".why__lead-content",
-      start: "top 80%",
-    },
-    y: 50,
-    opacity: 0,
-    duration: 1,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__byline", {
-    scrollTrigger: {
-      trigger: ".why__lead-content",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 0.8,
-    delay: 0.2,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__column--primary", {
-    scrollTrigger: {
-      trigger: ".why__columns",
-      start: "top 80%",
-    },
-    x: -50,
-    opacity: 0,
-    duration: 1,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__pullquote", {
-    scrollTrigger: {
-      trigger: ".why__column--secondary",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 1,
-    delay: 0.8,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__stat", {
-    scrollTrigger: {
-      trigger: ".why__stats",
-      start: "top 80%",
-    },
-    y: 20,
-    opacity: 0,
-    duration: 0.8,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__feature-image img", {
-    scrollTrigger: {
-      trigger: ".why__feature-image",
-      start: "top 80%",
-    },
-    scale: 1.1,
-    duration: 1,
-    ease: "power3.out",
-  });
-
-  gsap.from(".why__caption", {
-    scrollTrigger: {
-      trigger: ".why__feature-image",
-      start: "top 80%",
-    },
-    y: 30,
-    opacity: 0,
-    duration: 1,
-    delay: 0.5,
-    ease: "power3.out",
-  });
-
-  document.querySelectorAll(".features__spread").forEach((spread) => {
-    gsap.to(spread, {
-      backgroundPosition: "50% 20%",
-      ease: "none",
-      scrollTrigger: {
-        trigger: spread,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-      },
-    });
-  });
-
-  document.querySelectorAll(".spaces__item").forEach((item) => {
-    if (item.querySelector(".spaces__item-content")) {
-      gsap.from(item.querySelector(".spaces__item-content"), {
-        scrollTrigger: {
-          trigger: item,
-          start: "top 70%",
-        },
-        x: item.classList.contains("spaces__item:nth-child(even)") ? 50 : -50,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
+/**=======================================
+ * Function that handles scroll animations
+ ========================================*/
+function initScrollAnimations() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("animate-in");
+          observer.unobserve(entry.target);
+        }
       });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "0px 0px -20% 0px",
     }
+  );
 
-    if (item.querySelector(".spaces__parallax")) {
-      gsap.to(item.querySelector(".spaces__parallax"), {
-        scrollTrigger: {
-          trigger: item,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
-        y: -100,
-        ease: "none",
-      });
-    }
+  const elements = document.querySelectorAll(`
+    .chapter__chapter-number,
+    .chapter__chapter-info,
+    .hero__title,
+    .hero__caption,
+    .why__headline,
+    .why__byline,
+    .why__column--primary,
+    .why__pullquote,
+    .why__stat,
+    .why__feature-image,
+    .why__caption
+  `);
+
+  elements.forEach((el) => {
+    observer.observe(el);
   });
 }
 
