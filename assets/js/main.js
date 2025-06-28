@@ -49,7 +49,6 @@ function initMenuToggle() {
     link.addEventListener("click", closeMenu);
   });
 
-  // Close menu on escape key
   document.addEventListener("keydown", (e) => {
     if (
       e.key === "Escape" &&
@@ -66,114 +65,42 @@ function initMenuToggle() {
 function initFeaturesSliding() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
-  const featuresContainer = document.querySelector(".features__container");
 
-  // Initial setup - hide all spreads and set positioning
+  if (!spreads.length || !featuresSection) return;
+
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
+    gsap.set(spread, {
+      y: "100%",
+      scale: 0.7,
+      opacity: 0,
+      visibility: "hidden",
+    });
   });
 
-  let ticking = false;
-  let lastScrollTop = 0;
-  let isCompleted = false;
-
-  function updateSpreadsOnScroll() {
-    const scrollTop = window.pageYOffset;
-    const windowHeight = window.innerHeight;
-
-    const featuresRect = featuresSection.getBoundingClientRect();
-    const featuresTop = scrollTop + featuresRect.top;
-    const featuresBottom = featuresTop + featuresSection.offsetHeight;
-
-    // Get the next section to determine when to complete
-    const spacesSection = document.querySelector(".spaces__horizontal");
-    const spacesTop = spacesSection
-      ? scrollTop + spacesSection.getBoundingClientRect().top
-      : featuresBottom;
-
-    // Start animation when features header comes into view
-    const featuresHeaderBottom = featuresContainer
-      ? featuresTop + featuresContainer.offsetHeight
-      : featuresTop;
-    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.5;
-    const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
-
-    // Determine scroll direction
-    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
-    lastScrollTop = scrollTop;
-
-    // Check if we're in the active features section
-    const inFeaturesSection =
-      scrollTop >= featuresStartTrigger && scrollTop <= featuresEndTrigger;
-
-    const hasCompletedFeatures = scrollTop > featuresEndTrigger;
-
-    if (hasCompletedFeatures && !isCompleted) {
-      // Mark as completed - transition to static positioning
-      isCompleted = true;
-
-      featuresSection.classList.add("features--completed");
-
-      spreads.forEach((spread, index) => {
-        // Keep all spreads visible and transition to static positioning
-        spread.style.position = "absolute";
-        spread.style.top = "auto";
-        spread.style.bottom = "0";
-        spread.style.opacity = "1";
-        spread.style.visibility = "visible";
-        spread.style.transform = "translateY(0)";
-        spread.classList.add("features__spread--visible");
-
-        const elements = spread.querySelectorAll(
-          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-        );
-        elements.forEach((el) => {
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
-        });
-      });
-
-      ticking = false;
-      return;
-    }
-
-    if (isCompleted && scrollDirection === "up" && inFeaturesSection) {
-      // Re-entering features section from below - reset completed state and positioning
-      isCompleted = false;
-      featuresSection.classList.remove("features--completed");
-
-      // Reset all spreads back to fixed positioning
-      spreads.forEach((spread) => {
-        spread.style.position = "fixed";
-        spread.style.top = "0";
-        spread.style.bottom = "auto";
-      });
-    }
-
-    if (inFeaturesSection && !isCompleted) {
-      // Active features section - handle progressive reveal
-      const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
-      const scrollProgress = Math.max(
-        0,
-        Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
-      );
+  ScrollTrigger.create({
+    trigger: featuresSection,
+    start: "top bottom",
+    end: "bottom top",
+    scrub: 0.5,
+    onUpdate: (self) => {
+      const progress = self.progress;
 
       spreads.forEach((spread, index) => {
         const cardStartProgress = index * 0.2;
         const cardCompleteProgress = cardStartProgress + 0.15;
         const nextCardStartProgress = (index + 1) * 0.2;
 
-        if (
-          scrollProgress >= cardStartProgress &&
-          (index === spreads.length - 1 ||
-            scrollProgress < nextCardStartProgress)
-        ) {
-          // Current active card
+        const isActive =
+          progress >= cardStartProgress &&
+          (index === spreads.length - 1 || progress < nextCardStartProgress);
+
+        if (isActive) {
           const cardProgress = Math.max(
             0,
             Math.min(
               1,
-              (scrollProgress - cardStartProgress) /
+              (progress - cardStartProgress) /
                 (cardCompleteProgress - cardStartProgress)
             )
           );
@@ -181,131 +108,88 @@ function initFeaturesSliding() {
           let scale = 1;
           let opacity = 1;
 
-          // Special handling for first card
           if (index === 0 && cardProgress < 1) {
-            // First card: starts at scale(0.7) and scales up to scale(1)
-            scale = 0.7 + cardProgress * 0.3; // 0.7 → 1.0
+            scale = 0.7 + cardProgress * 0.3;
           }
 
-          // The spread needs to slide from below the viewport considering its margins
-          const viewportHeight = window.innerHeight;
-          const marginTop = viewportHeight * 0.015;
-          const marginBottom = viewportHeight * 0.015;
-          const effectiveHeight = viewportHeight - marginTop - marginBottom;
+          const translateY = (1 - cardProgress) * 100;
 
-          // Calculate translateY to account for margins
-          const initialOffset = effectiveHeight + marginBottom;
-          const translateY = (1 - cardProgress) * initialOffset;
-
-          spread.style.transform = `translateY(${translateY}px) scale(${scale})`;
-          spread.style.opacity = opacity;
-          spread.style.visibility = "visible";
-          spread.classList.add("features__spread--visible");
+          gsap.set(spread, {
+            y: `${translateY}%`,
+            scale: scale,
+            opacity: opacity,
+            visibility: "visible",
+          });
 
           const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+            ".features__spread-number, .features__spread-meta, .features__spread-text"
           );
 
           if (cardProgress > 0.3) {
-            elements.forEach((el) => {
-              el.style.opacity = "1";
-              el.style.transform = "translateY(0)";
+            gsap.set(elements, {
+              opacity: 1,
+              y: 0,
             });
           } else {
-            elements.forEach((el) => {
-              el.style.opacity = "0";
-              el.style.transform = "translateY(50px)";
+            gsap.set(elements, {
+              opacity: 0,
+              y: 50,
             });
           }
-        } else if (scrollProgress < cardStartProgress) {
-          // Card is before its time - position it below the viewport
-          const viewportHeight = window.innerHeight;
-          const marginBottom = viewportHeight * 0.015;
-          const effectiveHeight = viewportHeight - viewportHeight * 0.03;
-          const initialOffset = effectiveHeight + marginBottom;
-
-          spread.style.transform = `translateY(${initialOffset}px)`;
-          spread.style.opacity = "0";
-          spread.style.visibility = "hidden";
-          spread.classList.remove("features__spread--visible");
-
-          const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-          );
-          elements.forEach((el) => {
-            el.style.opacity = "0";
-            el.style.transform = "translateY(50px)";
+        } else if (progress < cardStartProgress) {
+          gsap.set(spread, {
+            y: "100%",
+            scale: 0.7,
+            opacity: 0,
+            visibility: "hidden",
           });
-        } else if (scrollProgress >= cardCompleteProgress) {
-          // Card has completed its entrance
+        } else if (progress >= cardCompleteProgress) {
           let scale = 1;
           let opacity = 1;
 
-          // Check if the NEXT card is starting to come in
           if (index < spreads.length - 1) {
             const nextCardStart = (index + 1) * 0.2;
-            if (scrollProgress >= nextCardStart) {
-              // Next card is sliding in, so THIS card (previous) should scale out
+            if (progress >= nextCardStart) {
               const nextCardProgress = Math.min(
                 1,
-                (scrollProgress - nextCardStart) / 0.15
+                (progress - nextCardStart) / 0.15
               );
-              scale = 1 - nextCardProgress * 0.2; // Scale from 1 to 0.8
-              opacity = 1 - nextCardProgress * 0.3; // Fade from 1 to 0.7
+              scale = 1 - nextCardProgress * 0.2;
+              opacity = 1 - nextCardProgress * 0.3;
             }
           }
 
-          spread.style.transform = `translateY(0px) scale(${scale})`;
-          spread.style.opacity = opacity;
-          spread.style.visibility = "visible";
-          spread.classList.add("features__spread--visible");
+          gsap.set(spread, {
+            y: "0%",
+            scale: scale,
+            opacity: opacity,
+            visibility: "visible",
+          });
 
           const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+            ".features__spread-number, .features__spread-meta, .features__spread-text"
           );
-          elements.forEach((el) => {
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
+          gsap.set(elements, {
+            opacity: 1,
+            y: 0,
           });
         }
       });
-    }
-
-    ticking = false;
-  }
-
-  function requestScrollUpdate() {
-    if (!ticking) {
-      requestAnimationFrame(updateSpreadsOnScroll);
-      ticking = true;
-    }
-  }
-
-  window.addEventListener("scroll", requestScrollUpdate, { passive: true });
-
-  // Handle window resize to recalculate margins
-  window.addEventListener(
-    "resize",
-    () => {
-      requestScrollUpdate();
     },
-    { passive: true }
-  );
-
-  // Initialize element transitions
-  spreads.forEach((spread) => {
-    const elements = spread.querySelectorAll(
-      ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-    );
-
-    elements.forEach((el) => {
-      el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
-      el.style.opacity = "0";
-      el.style.transform = "translateY(50px)";
-    });
   });
 
-  updateSpreadsOnScroll();
+  spreads.forEach((spread) => {
+    ScrollTrigger.create({
+      trigger: spread,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 1,
+      onUpdate: (self) => {
+        const yPos = -(self.progress * 20);
+        spread.style.backgroundPosition = `50% ${50 + yPos}%`;
+      },
+    });
+  });
 }
 
 /**==================================================================
@@ -576,7 +460,6 @@ function initAnimations() {
 
   // Each space item animation
   document.querySelectorAll(".spaces__item").forEach((item) => {
-    // Content animation
     gsap.from(item.querySelector(".spaces__item-content"), {
       scrollTrigger: {
         trigger: item,
