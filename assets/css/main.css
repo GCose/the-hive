@@ -1010,6 +1010,7 @@ section {
  ==================*/
 .features {
   padding: 0;
+  overflow: hidden;
   position: relative;
   background: #ffffff;
 }
@@ -1028,7 +1029,6 @@ section {
   min-height: 100vh;
   align-items: center;
   background-size: cover;
-  transform: translateY(100%);
   background-position: center;
   border-radius: 6rem 6rem 0 0;
   background-repeat: no-repeat;

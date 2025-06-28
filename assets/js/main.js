@@ -70,8 +70,9 @@ function initFeaturesSliding() {
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
 
-    // Initialize spreads as hidden
-    spread.style.transform = "translateY(100vh)";
+    // Initialize spreads as hidden relative to features section
+    const sectionHeight = featuresSection.offsetHeight;
+    spread.style.transform = `translateY(${sectionHeight}px)`;
     spread.style.opacity = "0";
     spread.style.visibility = "hidden";
     spread.classList.remove("features__spread--visible");
@@ -97,7 +98,7 @@ function initFeaturesSliding() {
     const featuresHeaderBottom = featuresContainer
       ? featuresTop + featuresContainer.offsetHeight
       : featuresTop;
-    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.5;
+    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
     const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
 
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
@@ -179,10 +180,10 @@ function initFeaturesSliding() {
             scale = 0.7 + cardProgress * 0.3;
           }
 
-          const viewportHeight = window.innerHeight;
-          const marginTop = viewportHeight * 0.015;
-          const marginBottom = viewportHeight * 0.015;
-          const effectiveHeight = viewportHeight - marginTop - marginBottom;
+          const sectionHeight = featuresSection.offsetHeight;
+          const marginTop = sectionHeight * 0.015;
+          const marginBottom = sectionHeight * 0.015;
+          const effectiveHeight = sectionHeight - marginTop - marginBottom;
 
           const initialOffset = effectiveHeight + marginBottom;
           const translateY = (1 - cardProgress) * initialOffset;
@@ -215,9 +216,9 @@ function initFeaturesSliding() {
             });
           }
         } else if (scrollProgress < cardStartProgress) {
-          const viewportHeight = window.innerHeight;
-          const marginBottom = viewportHeight * 0.015;
-          const effectiveHeight = viewportHeight - viewportHeight * 0.03;
+          const sectionHeight = featuresSection.offsetHeight;
+          const marginBottom = sectionHeight * 0.015;
+          const effectiveHeight = sectionHeight - sectionHeight * 0.03;
           const initialOffset = effectiveHeight + marginBottom;
 
           requestAnimationFrame(() => {
@@ -289,6 +290,13 @@ function initFeaturesSliding() {
   window.addEventListener(
     "resize",
     () => {
+      // Recalculate section height on resize
+      spreads.forEach((spread, index) => {
+        if (!spread.classList.contains("features__spread--visible")) {
+          const sectionHeight = featuresSection.offsetHeight;
+          spread.style.transform = `translateY(${sectionHeight}px)`;
+        }
+      });
       requestScrollUpdate();
     },
     { passive: true }
