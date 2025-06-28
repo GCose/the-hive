@@ -427,7 +427,7 @@ function initSpacesHorizontal() {
  ========================================*/
 function initScrollAnimations() {
   const scrollTextElements = document.querySelectorAll(
-    ".chapter__chapter-title, .features__spread-title, .spaces__slide-title, .spaces__chapter-title"
+    ".section__chapter-title, .features__spread-title, .spaces__slide-title, .spaces__chapter-title"
   );
 
   const textObserver = new IntersectionObserver(
