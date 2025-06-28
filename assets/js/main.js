@@ -65,42 +65,103 @@ function initMenuToggle() {
 function initFeaturesSliding() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
-
-  if (!spreads.length || !featuresSection) return;
+  const featuresContainer = document.querySelector(".features__container");
 
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
-    gsap.set(spread, {
-      y: "100%",
-      scale: 0.7,
-      opacity: 0,
-      visibility: "hidden",
-    });
   });
 
-  ScrollTrigger.create({
-    trigger: featuresSection,
-    start: "top bottom",
-    end: "bottom top",
-    scrub: 0.5,
-    onUpdate: (self) => {
-      const progress = self.progress;
+  let ticking = false;
+  let lastScrollTop = 0;
+  let isCompleted = false;
+
+  function updateSpreadsOnScroll() {
+    const scrollTop = window.pageYOffset;
+    const windowHeight = window.innerHeight;
+
+    const featuresRect = featuresSection.getBoundingClientRect();
+    const featuresTop = scrollTop + featuresRect.top;
+    const featuresBottom = featuresTop + featuresSection.offsetHeight;
+
+    const spacesSection = document.querySelector(".spaces__horizontal");
+    const spacesTop = spacesSection
+      ? scrollTop + spacesSection.getBoundingClientRect().top
+      : featuresBottom;
+
+    const featuresHeaderBottom = featuresContainer
+      ? featuresTop + featuresContainer.offsetHeight
+      : featuresTop;
+    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.5;
+    const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
+
+    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
+    lastScrollTop = scrollTop;
+
+    const inFeaturesSection =
+      scrollTop >= featuresStartTrigger && scrollTop <= featuresEndTrigger;
+
+    const hasCompletedFeatures = scrollTop > featuresEndTrigger;
+
+    if (hasCompletedFeatures && !isCompleted) {
+      isCompleted = true;
+
+      featuresSection.classList.add("features--completed");
+
+      spreads.forEach((spread, index) => {
+        spread.style.position = "absolute";
+        spread.style.top = "auto";
+        spread.style.bottom = "0";
+        spread.style.opacity = "1";
+        spread.style.visibility = "visible";
+        spread.style.transform = "translateY(0)";
+        spread.classList.add("features__spread--visible");
+
+        const elements = spread.querySelectorAll(
+          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+        );
+        elements.forEach((el) => {
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+        });
+      });
+
+      ticking = false;
+      return;
+    }
+
+    if (isCompleted && scrollDirection === "up" && inFeaturesSection) {
+      isCompleted = false;
+      featuresSection.classList.remove("features--completed");
+
+      spreads.forEach((spread) => {
+        spread.style.position = "fixed";
+        spread.style.top = "0";
+        spread.style.bottom = "auto";
+      });
+    }
+
+    if (inFeaturesSection && !isCompleted) {
+      const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
+      const scrollProgress = Math.max(
+        0,
+        Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
+      );
 
       spreads.forEach((spread, index) => {
         const cardStartProgress = index * 0.2;
         const cardCompleteProgress = cardStartProgress + 0.15;
         const nextCardStartProgress = (index + 1) * 0.2;
 
-        const isActive =
-          progress >= cardStartProgress &&
-          (index === spreads.length - 1 || progress < nextCardStartProgress);
-
-        if (isActive) {
+        if (
+          scrollProgress >= cardStartProgress &&
+          (index === spreads.length - 1 ||
+            scrollProgress < nextCardStartProgress)
+        ) {
           const cardProgress = Math.max(
             0,
             Math.min(
               1,
-              (progress - cardStartProgress) /
+              (scrollProgress - cardStartProgress) /
                 (cardCompleteProgress - cardStartProgress)
             )
           );
@@ -112,84 +173,134 @@ function initFeaturesSliding() {
             scale = 0.7 + cardProgress * 0.3;
           }
 
-          const translateY = (1 - cardProgress) * 100;
+          const viewportHeight = window.innerHeight;
+          const marginTop = viewportHeight * 0.015;
+          const marginBottom = viewportHeight * 0.015;
+          const effectiveHeight = viewportHeight - marginTop - marginBottom;
 
-          gsap.set(spread, {
-            y: `${translateY}%`,
-            scale: scale,
-            opacity: opacity,
-            visibility: "visible",
+          const initialOffset = effectiveHeight + marginBottom;
+          const translateY = (1 - cardProgress) * initialOffset;
+
+          requestAnimationFrame(() => {
+            spread.style.transform = `translateY(${translateY}px) scale(${scale})`;
+            spread.style.opacity = opacity;
+            spread.style.visibility = "visible";
           });
 
+          spread.classList.add("features__spread--visible");
+
           const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text"
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
           );
 
           if (cardProgress > 0.3) {
-            gsap.set(elements, {
-              opacity: 1,
-              y: 0,
+            elements.forEach((el) => {
+              requestAnimationFrame(() => {
+                el.style.opacity = "1";
+                el.style.transform = "translateY(0)";
+              });
             });
           } else {
-            gsap.set(elements, {
-              opacity: 0,
-              y: 50,
+            elements.forEach((el) => {
+              requestAnimationFrame(() => {
+                el.style.opacity = "0";
+                el.style.transform = "translateY(50px)";
+              });
             });
           }
-        } else if (progress < cardStartProgress) {
-          gsap.set(spread, {
-            y: "100%",
-            scale: 0.7,
-            opacity: 0,
-            visibility: "hidden",
+        } else if (scrollProgress < cardStartProgress) {
+          const viewportHeight = window.innerHeight;
+          const marginBottom = viewportHeight * 0.015;
+          const effectiveHeight = viewportHeight - viewportHeight * 0.03;
+          const initialOffset = effectiveHeight + marginBottom;
+
+          requestAnimationFrame(() => {
+            spread.style.transform = `translateY(${initialOffset}px)`;
+            spread.style.opacity = "0";
+            spread.style.visibility = "hidden";
           });
-        } else if (progress >= cardCompleteProgress) {
+
+          spread.classList.remove("features__spread--visible");
+
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+          );
+          elements.forEach((el) => {
+            requestAnimationFrame(() => {
+              el.style.opacity = "0";
+              el.style.transform = "translateY(50px)";
+            });
+          });
+        } else if (scrollProgress >= cardCompleteProgress) {
           let scale = 1;
           let opacity = 1;
 
           if (index < spreads.length - 1) {
             const nextCardStart = (index + 1) * 0.2;
-            if (progress >= nextCardStart) {
+            if (scrollProgress >= nextCardStart) {
               const nextCardProgress = Math.min(
                 1,
-                (progress - nextCardStart) / 0.15
+                (scrollProgress - nextCardStart) / 0.15
               );
               scale = 1 - nextCardProgress * 0.2;
               opacity = 1 - nextCardProgress * 0.3;
             }
           }
 
-          gsap.set(spread, {
-            y: "0%",
-            scale: scale,
-            opacity: opacity,
-            visibility: "visible",
+          requestAnimationFrame(() => {
+            spread.style.transform = `translateY(0px) scale(${scale})`;
+            spread.style.opacity = opacity;
+            spread.style.visibility = "visible";
           });
 
+          spread.classList.add("features__spread--visible");
+
           const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text"
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
           );
-          gsap.set(elements, {
-            opacity: 1,
-            y: 0,
+          elements.forEach((el) => {
+            requestAnimationFrame(() => {
+              el.style.opacity = "1";
+              el.style.transform = "translateY(0)";
+            });
           });
         }
       });
+    }
+
+    ticking = false;
+  }
+
+  function requestScrollUpdate() {
+    if (!ticking) {
+      requestAnimationFrame(updateSpreadsOnScroll);
+      ticking = true;
+    }
+  }
+
+  window.addEventListener("scroll", requestScrollUpdate, { passive: true });
+
+  window.addEventListener(
+    "resize",
+    () => {
+      requestScrollUpdate();
     },
-  });
+    { passive: true }
+  );
 
   spreads.forEach((spread) => {
-    ScrollTrigger.create({
-      trigger: spread,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: 1,
-      onUpdate: (self) => {
-        const yPos = -(self.progress * 20);
-        spread.style.backgroundPosition = `50% ${50 + yPos}%`;
-      },
+    const elements = spread.querySelectorAll(
+      ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+    );
+
+    elements.forEach((el) => {
+      el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(50px)";
     });
   });
+
+  updateSpreadsOnScroll();
 }
 
 /**==================================================================
@@ -211,8 +322,8 @@ function initSpacesHorizontal() {
     spacesWrapper.style.width = `${totalWidth}px`;
 
     const transformDistance = (totalSlides - 1) * slideWidth;
-    const viewportEquivalent = transformDistance / slideWidth; // How many "screens"
-    const scrollHeight = (viewportEquivalent + 1) * 100; // +1 for the section itself
+    const viewportEquivalent = transformDistance / slideWidth;
+    const scrollHeight = (viewportEquivalent + 1) * 100;
 
     scrollArea.style.height = `${scrollHeight}vh`;
   }
@@ -303,7 +414,6 @@ function initSpacesHorizontal() {
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Chapter header animation
   gsap.from(".chapter__chapter-number", {
     scrollTrigger: {
       trigger: ".chapter__header",
@@ -311,7 +421,7 @@ function initAnimations() {
     },
     scale: 0.5,
     opacity: 0,
-    duration: 5,
+    duration: 1.2,
     ease: "power3.out",
   });
 
@@ -322,12 +432,11 @@ function initAnimations() {
     },
     x: -30,
     opacity: 0,
-    duration: 4,
+    duration: 1,
     delay: 0.3,
     ease: "power3.out",
   });
 
-  // Hero section animation
   gsap.from(".hero__title", {
     y: 50,
     opacity: 0,
@@ -351,7 +460,7 @@ function initAnimations() {
     },
     y: 50,
     opacity: 0,
-    duration: 5,
+    duration: 1,
     ease: "power3.out",
   });
 
@@ -362,7 +471,7 @@ function initAnimations() {
     },
     y: 30,
     opacity: 0,
-    duration: 3,
+    duration: 0.8,
     delay: 0.2,
     ease: "power3.out",
   });
@@ -374,7 +483,7 @@ function initAnimations() {
     },
     x: -50,
     opacity: 0,
-    duration: 6,
+    duration: 1,
     ease: "power3.out",
   });
 
@@ -390,7 +499,6 @@ function initAnimations() {
     ease: "power3.out",
   });
 
-  // Stats animation with stagger
   gsap.from(".why__stat", {
     scrollTrigger: {
       trigger: ".why__stats",
@@ -399,11 +507,9 @@ function initAnimations() {
     y: 20,
     opacity: 0,
     duration: 0.8,
-    stagger: 0.1,
     ease: "power3.out",
   });
 
-  // Feature image animation
   gsap.from(".why__feature-image img", {
     scrollTrigger: {
       trigger: ".why__feature-image",
@@ -437,51 +543,34 @@ function initAnimations() {
         scrub: 1,
       },
     });
-
-    const quote = spread.querySelector(".features__spread-quote");
-    if (quote) {
-      gsap.fromTo(
-        quote,
-        { scale: 0.98 },
-        {
-          scale: 1,
-          duration: 1.5,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: quote,
-            start: "top 80%",
-            end: "top 50%",
-            scrub: 1,
-          },
-        }
-      );
-    }
   });
 
-  // Each space item animation
   document.querySelectorAll(".spaces__item").forEach((item) => {
-    gsap.from(item.querySelector(".spaces__item-content"), {
-      scrollTrigger: {
-        trigger: item,
-        start: "top 70%",
-      },
-      x: item.classList.contains("spaces__item:nth-child(even)") ? 50 : -50,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-    });
+    if (item.querySelector(".spaces__item-content")) {
+      gsap.from(item.querySelector(".spaces__item-content"), {
+        scrollTrigger: {
+          trigger: item,
+          start: "top 70%",
+        },
+        x: item.classList.contains("spaces__item:nth-child(even)") ? 50 : -50,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+      });
+    }
 
-    // Parallax effect for spaces images
-    gsap.to(item.querySelector(".spaces__parallax"), {
-      scrollTrigger: {
-        trigger: item,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      },
-      y: -100,
-      ease: "none",
-    });
+    if (item.querySelector(".spaces__parallax")) {
+      gsap.to(item.querySelector(".spaces__parallax"), {
+        scrollTrigger: {
+          trigger: item,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+        y: -100,
+        ease: "none",
+      });
+    }
   });
 }
 
