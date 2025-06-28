@@ -69,6 +69,12 @@ function initFeaturesSliding() {
 
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
+
+    // Initialize spreads as hidden
+    spread.style.transform = "translateY(100vh)";
+    spread.style.opacity = "0";
+    spread.style.visibility = "hidden";
+    spread.classList.remove("features__spread--visible");
   });
 
   let ticking = false;
@@ -300,7 +306,10 @@ function initFeaturesSliding() {
     });
   });
 
-  updateSpreadsOnScroll();
+  // Only call this after a small delay to ensure proper initialization
+  setTimeout(() => {
+    updateSpreadsOnScroll();
+  }, 100);
 }
 
 /**==================================================================
