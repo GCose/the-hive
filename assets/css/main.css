@@ -1666,7 +1666,7 @@ section {
 }
 
 .community__membership-types {
-  border-radius: 0 0 0 5rem;
+  border-radius: 0 5rem 0 5rem;
   backdrop-filter: blur(30px);
   padding: clamp(2rem, 3vw, 3rem);
   background-color: rgba(255, 255, 255, 0.9);
@@ -1686,17 +1686,17 @@ section {
 
 .community__type-title {
   margin: 0 0 1rem;
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1.2;
   color: var(--color-primary);
-  font-size: clamp(1.6rem, 2vw, 1.8rem);
+  font-size: clamp(1.6rem, 2vw, 2.5rem);
 }
 
 .community__type-description {
   margin: 0;
   line-height: 1.5;
   color: var(--color-gray);
-  font-size: clamp(1.4rem, 1.6vw, 1.5rem);
+  font-size: clamp(1.4rem, 1.6vw, 1.8rem);
 }
 
 .community__feature-image-grid {
@@ -1715,7 +1715,7 @@ section {
   overflow: hidden;
   position: relative;
   grid-column: 1 / 2;
-  border-radius: 5rem 0 0 0;
+  border-radius: 0 0 0 5rem;
 }
 
 .community__image-secondary {
@@ -2028,7 +2028,7 @@ section {
   font-style: italic;
   text-align: center;
   color: var(--color-white);
-  border-radius: 0 0 0 3rem;
+  border-radius: 3rem 0 3rem 0;
   padding: clamp(2rem, 3vw, 3rem);
   font-size: clamp(1.8rem, 2.2vw, 2rem);
   background-color: var(--color-primary);
@@ -2342,8 +2342,9 @@ section {
  * FOOTER STYLES
  ==================*/
 .footer {
-  position: relative;
   overflow: hidden;
+  position: relative;
+  color: var(--color-white);
   padding: clamp(8rem, 12vw, 12rem) 0 clamp(4rem, 6vw, 6rem);
   background: linear-gradient(
     135deg,
@@ -2351,48 +2352,47 @@ section {
     #1a1a1a 50%,
     var(--color-dark) 100%
   );
-  color: var(--color-white);
 }
 
 .footer::before {
-  content: "";
-  position: absolute;
   top: -50%;
   right: -20%;
+  content: "";
   width: 60rem;
   height: 60rem;
+  position: absolute;
+  border-radius: 50%;
   background: radial-gradient(
     circle,
     rgba(212, 168, 43, 0.05) 0%,
     transparent 70%
   );
-  border-radius: 50%;
 }
 
 .footer__container {
+  z-index: 2;
   width: 100%;
   margin: 0 auto;
   max-width: 140rem;
   position: relative;
-  z-index: 2;
   padding: 0 clamp(2rem, 4vw, 4rem);
 }
 
 .footer__main {
   display: grid;
+  align-items: start;
   gap: clamp(6rem, 8vw, 8rem);
   grid-template-columns: 1fr 1fr;
-  align-items: start;
   margin-bottom: clamp(8rem, 10vw, 10rem);
 }
 
 .footer__logo-section {
   text-align: left;
-  border-radius: 0 0 8rem;
-  background: var(--color-white);
 }
 
 .footer__logo {
+  border-radius: 8rem 0 8rem;
+  background: var(--color-white);
   width: clamp(25rem, 35vw, 45rem);
   margin-bottom: clamp(2rem, 3vw, 3rem);
 }
@@ -2406,42 +2406,42 @@ section {
   margin: 0;
   font-weight: 300;
   font-style: italic;
+  letter-spacing: 0.05em;
   color: var(--color-secondary);
   font-size: clamp(1.8rem, 2.5vw, 2.4rem);
-  letter-spacing: 0.05em;
 }
 
 .footer__info {
   display: grid;
+  max-width: 50rem;
+  justify-self: end;
   gap: clamp(4rem, 6vw, 6rem);
   grid-template-columns: 1fr 1fr;
-  justify-self: end;
-  max-width: 50rem;
 }
 
 .footer__contact-title,
 .footer__social-title {
-  margin: 0 0 clamp(2rem, 3vw, 3rem);
   font-weight: 600;
-  font-size: clamp(1.6rem, 2vw, 1.8rem);
-  color: var(--color-secondary);
-  text-transform: uppercase;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+  margin: 0 0 clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.6rem, 2vw, 1.8rem);
 }
 
 .footer__contact-details {
+  gap: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   margin-bottom: clamp(2rem, 3vw, 3rem);
 }
 
 .footer__contact-link {
-  color: var(--color-white);
-  text-decoration: none;
-  font-size: clamp(1.6rem, 2vw, 1.8rem);
   font-weight: 400;
+  text-decoration: none;
+  color: var(--color-white);
   transition: color 0.3s ease;
+  font-size: clamp(1.6rem, 2vw, 1.8rem);
 }
 
 .footer__contact-link:hover {
@@ -2455,35 +2455,35 @@ section {
 }
 
 .footer__social-links {
+  gap: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 }
 
 .footer__social-link {
-  color: var(--color-white);
-  text-decoration: none;
-  font-size: clamp(1.6rem, 2vw, 1.8rem);
   font-weight: 400;
-  transition: all 0.3s ease;
   position: relative;
   width: fit-content;
+  text-decoration: none;
+  color: var(--color-white);
+  transition: all 0.3s ease;
+  font-size: clamp(1.6rem, 2vw, 1.8rem);
 }
 
 .footer__social-link::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
   left: 0;
   width: 0;
+  content: "";
   height: 1px;
-  background-color: var(--color-secondary);
+  bottom: -2px;
+  position: absolute;
   transition: width 0.3s ease;
+  background-color: var(--color-secondary);
 }
 
 .footer__social-link:hover {
-  color: var(--color-secondary);
   transform: translateX(5px);
+  color: var(--color-secondary);
 }
 
 .footer__social-link:hover::after {
@@ -2492,47 +2492,47 @@ section {
 
 .footer__bottom {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: space-between;
   padding-top: clamp(4rem, 6vw, 6rem);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
 }
 
 .footer__credits {
+  gap: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .footer__affinity {
   margin: 0;
-  font-size: clamp(1.6rem, 2vw, 1.8rem);
   font-weight: 400;
   color: var(--color-white);
+  font-size: clamp(1.6rem, 2vw, 1.8rem);
 }
 
 .footer__affinity span {
-  color: var(--color-secondary);
   font-weight: 600;
+  color: var(--color-secondary);
 }
 
 .footer__copyright {
   margin: 0;
-  font-size: clamp(1.3rem, 1.6vw, 1.4rem);
   color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(1.3rem, 1.6vw, 1.4rem);
 }
 
 .footer__hexagon-pattern {
-  position: relative;
   width: 8rem;
   height: 8rem;
+  position: relative;
 }
 
 .footer__hexagon {
-  position: absolute;
   width: 2rem;
   height: 2rem;
+  position: absolute;
   background-color: rgba(212, 168, 43, 0.2);
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
@@ -2545,17 +2545,20 @@ section {
 }
 
 .footer__hexagon--2 {
-  bottom: 0;
   left: 0;
+  bottom: 0;
   animation: float 3s ease-in-out infinite 1s;
 }
 
 .footer__hexagon--3 {
-  bottom: 0;
   right: 0;
+  bottom: 0;
   animation: float 3s ease-in-out infinite 2s;
 }
 
+/**====================
+ * ANIMATION STYLES
+ =====================*/
 @keyframes float {
   0%,
   100% {
@@ -2604,8 +2607,8 @@ section {
   }
 
   .footer__info {
-    justify-self: start;
     max-width: 100%;
+    justify-self: start;
   }
 }
 
@@ -2616,9 +2619,9 @@ section {
   }
 
   .footer__bottom {
-    flex-direction: column;
     gap: 3rem;
     text-align: center;
+    flex-direction: column;
   }
 
   .footer__hexagon-pattern {
