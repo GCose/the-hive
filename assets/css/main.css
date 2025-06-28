@@ -2297,6 +2297,26 @@ section {
   position: relative;
 }
 
+.ready__visit-cta--gold {
+  color: var(--color-dark);
+  background-color: var(--color-secondary);
+}
+
+.ready__visit-cta--gold:hover {
+  color: var(--color-white);
+  background-color: var(--color-primary);
+}
+
+.ready__visit-cta--green {
+  color: var(--color-white);
+  background-color: var(--color-primary);
+}
+
+.ready__visit-cta--green:hover {
+  color: var(--color-dark);
+  background-color: var(--color-secondary);
+}
+
 /**====================
  * BREAKPOINT STYLES
  =====================*/
