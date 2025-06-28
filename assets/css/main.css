@@ -46,12 +46,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
 html {
   height: 100%;
   font-size: 62.5%;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -366,7 +366,6 @@ section {
   visibility: hidden;
   background: #3e5243ac;
   color: var(--color-white);
-  backdrop-filter: blur(0px);
   transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     visibility 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     backdrop-filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -900,7 +899,6 @@ section {
   gap: 4rem;
   display: grid;
   border-radius: 0 0 5rem 0;
-  backdrop-filter: blur(30px);
   background-color: #ffffff;
   padding: clamp(2rem, 3vw, 3rem);
 }
@@ -1667,7 +1665,6 @@ section {
 
 .community__membership-types {
   border-radius: 0 5rem 0 5rem;
-  backdrop-filter: blur(30px);
   padding: clamp(2rem, 3vw, 3rem);
   background-color: rgba(255, 255, 255, 0.9);
 }
@@ -2349,7 +2346,7 @@ section {
   background: linear-gradient(
     135deg,
     var(--color-dark) 0%,
-    #1a1a1a 50%,
+    var(--color-primary) 50%,
     var(--color-dark) 100%
   );
 }
