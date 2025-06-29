@@ -541,7 +541,7 @@ section {
   font-weight: 800;
   transform: scale(0.8);
   color: var(--color-white);
-  font-size: clamp(1.6rem, 2vw, 4rem);
+  font-size: clamp(2rem, 2vw, 4rem);
   transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
