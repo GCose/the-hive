@@ -223,7 +223,6 @@ section {
 @media (max-width: 768px) {
   .section__chapter {
     gap: 2rem;
-    flex-direction: column;
     align-items: flex-start;
   }
 }

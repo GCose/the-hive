@@ -27,33 +27,6 @@ function initAboutAnimations() {
 
     observer.observe(heroImage);
   }
-
-  // Value cards stagger animation
-  const valueCards = document.querySelectorAll(".about__value");
-
-  if (valueCards.length > 0) {
-    const valuesObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry, index) => {
-          if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.style.opacity = "1";
-              entry.target.style.transform = "translateY(0)";
-            }, index * 150);
-            valuesObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    valueCards.forEach((card, index) => {
-      card.style.opacity = "0";
-      card.style.transform = "translateY(30px)";
-      card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-      valuesObserver.observe(card);
-    });
-  }
 }
 
 /**=========================================
