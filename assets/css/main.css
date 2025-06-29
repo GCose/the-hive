@@ -710,14 +710,14 @@ section {
 }
 
 .ready__visit::before {
-  top: -10%;
-  left: -5%;
+  top: 35%;
+  left: 8%;
   content: "";
-  opacity: 0.1;
+  opacity: 0.9;
   width: 15rem;
   height: 15rem;
   position: absolute;
-  transform: rotate(-15deg);
+  transform: translateY(-50%) rotate(45deg);
   background-image: url("../images/logos/logo-1.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -725,10 +725,10 @@ section {
 
 .ready__visit::after {
   content: "";
-  right: -5%;
-  bottom: -10%;
+  right: 5%;
+  bottom: 5%;
   width: 20rem;
-  opacity: 0.08;
+  opacity: 0.9;
   height: 20rem;
   position: absolute;
   transform: rotate(25deg);
@@ -747,12 +747,12 @@ section {
 }
 
 .ready__visit-container::before {
-  top: 50%;
   left: -8%;
+  bottom: 2%;
   content: "";
   width: 12rem;
   height: 12rem;
-  opacity: 0.06;
+  opacity: 0.9;
   position: absolute;
   transform: translateY(-50%) rotate(45deg);
   background-image: url("../images/logos/logo-1.png");
@@ -765,8 +765,8 @@ section {
   right: -8%;
   content: "";
   width: 18rem;
+  opacity: 0.9;
   height: 18rem;
-  opacity: 0.05;
   position: absolute;
   transform: rotate(-30deg);
   background-image: url("../images/logos/logo-1.png");
@@ -897,8 +897,8 @@ section {
 }
 
 /**====================
-   * BREAKPOINT STYLES
-   =====================*/
+ * BREAKPOINT STYLES
+ =====================*/
 @media (max-width: 768px) {
   .ready__visit-actions {
     gap: clamp(1.5rem, 2vw, 2rem);
@@ -927,8 +927,8 @@ section {
 }
 
 /**=================
-   * FOOTER STYLES
-   ==================*/
+ * FOOTER STYLES
+ ==================*/
 .footer {
   overflow: hidden;
   position: relative;
