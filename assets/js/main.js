@@ -110,18 +110,37 @@ function initSectionObservers() {
   if (spacesSection) observer.observe(spacesSection);
 }
 
-/**==========================================================
+/**==============================================
  * Function that creates features scroll handler
- ===========================================================*/
+ ===============================================*/
 function createFeaturesScrollHandler() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
   const featuresContainer = document.querySelector(".features__container");
 
+  // Cache DOM measurements
+  let cachedFeaturesTop = featuresSection.offsetTop;
+  let cachedFeaturesHeight = featuresSection.offsetHeight;
+  let cachedFeaturesBottom = cachedFeaturesTop + cachedFeaturesHeight;
+  let cachedContainerHeight = featuresContainer
+    ? featuresContainer.offsetHeight
+    : 0;
+
+  // Update cache on resize
+  const updateCache = () => {
+    cachedFeaturesTop = featuresSection.offsetTop;
+    cachedFeaturesHeight = featuresSection.offsetHeight;
+    cachedFeaturesBottom = cachedFeaturesTop + cachedFeaturesHeight;
+    cachedContainerHeight = featuresContainer
+      ? featuresContainer.offsetHeight
+      : 0;
+  };
+
+  window.addEventListener("resize", updateCache, { passive: true });
+
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
-    const sectionHeight = featuresSection.offsetHeight;
-    spread.style.transform = `translate3d(0, ${sectionHeight}px, 0)`;
+    spread.style.transform = `translate3d(0, ${cachedFeaturesHeight}px, 0)`;
     spread.style.opacity = "0";
     spread.style.visibility = "hidden";
     spread.classList.remove("features__spread--visible");
@@ -138,15 +157,9 @@ function createFeaturesScrollHandler() {
       const scrollTop = window.pageYOffset;
       const windowHeight = window.innerHeight;
 
-      const featuresRect = featuresSection.getBoundingClientRect();
-      const featuresTop = scrollTop + featuresRect.top;
-      const featuresBottom = featuresTop + featuresSection.offsetHeight;
-
-      const featuresHeaderBottom = featuresContainer
-        ? featuresTop + featuresContainer.offsetHeight
-        : featuresTop;
+      const featuresHeaderBottom = cachedFeaturesTop + cachedContainerHeight;
       const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
-      const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
+      const featuresEndTrigger = cachedFeaturesBottom - windowHeight * 1.2;
 
       const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
       lastScrollTop = scrollTop;
@@ -225,10 +238,10 @@ function createFeaturesScrollHandler() {
               scale = 0.7 + cardProgress * 0.3;
             }
 
-            const sectionHeight = featuresSection.offsetHeight;
-            const marginTop = sectionHeight * 0.015;
-            const marginBottom = sectionHeight * 0.015;
-            const effectiveHeight = sectionHeight - marginTop - marginBottom;
+            const marginTop = cachedFeaturesHeight * 0.015;
+            const marginBottom = cachedFeaturesHeight * 0.015;
+            const effectiveHeight =
+              cachedFeaturesHeight - marginTop - marginBottom;
 
             const initialOffset = effectiveHeight + marginBottom;
             const translateY = (1 - cardProgress) * initialOffset;
@@ -254,9 +267,9 @@ function createFeaturesScrollHandler() {
               });
             }
           } else if (scrollProgress < cardStartProgress) {
-            const sectionHeight = featuresSection.offsetHeight;
-            const marginBottom = sectionHeight * 0.015;
-            const effectiveHeight = sectionHeight - sectionHeight * 0.03;
+            const marginBottom = cachedFeaturesHeight * 0.015;
+            const effectiveHeight =
+              cachedFeaturesHeight - cachedFeaturesHeight * 0.03;
             const initialOffset = effectiveHeight + marginBottom;
 
             spread.style.transform = `translate3d(0, ${initialOffset}px, 0)`;
@@ -310,9 +323,9 @@ function createFeaturesScrollHandler() {
   };
 }
 
-/**==================================================================
+/**========================================================
  * Function that creates spaces horizontal scroll handler
- ===================================================================*/
+ =========================================================*/
 function createSpacesScrollHandler() {
   const spacesSection = document.querySelector(".spaces__horizontal");
   const spacesWrapper = document.querySelector(".spaces__wrapper");
@@ -320,10 +333,21 @@ function createSpacesScrollHandler() {
 
   const totalSlides = slides.length;
 
+  // Cache DOM measurements
+  let cachedSectionTop = spacesSection.offsetTop;
+  let cachedSectionHeight = spacesSection.offsetHeight;
+
+  // Update cache on resize
+  const updateCache = () => {
+    cachedSectionTop = spacesSection.offsetTop;
+    cachedSectionHeight = spacesSection.offsetHeight;
+  };
+
   function updateDimensions() {
     const slideWidth = window.innerWidth;
     const totalWidth = slideWidth * totalSlides;
     spacesWrapper.style.width = `${totalWidth}px`;
+    updateCache(); // Update cache when dimensions change
   }
 
   let isFixed = false;
@@ -335,13 +359,11 @@ function createSpacesScrollHandler() {
 
   return function handleSpacesScroll() {
     const scrollTop = window.pageYOffset;
-    const sectionTop = spacesSection.offsetTop;
-    const sectionHeight = spacesSection.offsetHeight;
     const viewportHeight = window.innerHeight;
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
 
-    const sectionStart = sectionTop;
-    const sectionEnd = sectionTop + sectionHeight - viewportHeight;
+    const sectionStart = cachedSectionTop;
+    const sectionEnd = cachedSectionTop + cachedSectionHeight - viewportHeight;
     const isInSection = scrollTop >= sectionStart && scrollTop <= sectionEnd;
 
     if (isInSection) {
