@@ -1025,6 +1025,7 @@ section {
   display: flex;
   position: fixed;
   min-height: 100vh;
+  visibility: hidden;
   align-items: center;
   background-size: cover;
   background-position: center;
