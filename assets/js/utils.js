@@ -1,5 +1,14 @@
+/**===========================================
+ * Function that initializes shared features.
+ ============================================*/
+function initSharedFeatures() {
+  initLoader();
+  initMenuToggle();
+  initScrollAnimations();
+}
+
 /**=========================================
- * Function that handles loading animation
+ * Function that handles loading animation.
  ==========================================*/
 function initLoader() {
   const loader = document.querySelector(".loader");
@@ -26,10 +35,10 @@ function initLoader() {
 }
 
 /**============================================
- * Function that handles menu overlay toggle
+ * Function that handles menu overlay toggle.
  =============================================*/
 function initMenuToggle() {
-  const menuToggle = document.querySelector(".hero__menu-toggle");
+  const menuToggle = document.querySelector(".menu__toggle");
   const menuClose = document.querySelector(".menu__close");
   const menuOverlay = document.querySelector(".menu__overlay");
   const menuLinks = document.querySelectorAll(".menu__link");
@@ -63,9 +72,9 @@ function initMenuToggle() {
   });
 }
 
-/**=======================================
- * Function that handles scroll animations
- ========================================*/
+/**=========================================
+ * Function that handles scroll animations.
+ ==========================================*/
 function initScrollAnimations() {
   const scrollTextElements = document.querySelectorAll(
     ".section__chapter-title, .features__spread-title, .spaces__slide-title, .spaces__chapter-title"
@@ -86,9 +95,9 @@ function initScrollAnimations() {
   scrollTextElements.forEach((el) => textObserver.observe(el));
 }
 
-/**============================================
- * Function that handles text reveal animation
- =============================================*/
+/**==============================================
+ * Function that handles text reveal animation.
+ ===============================================*/
 function animateTextReveal(element) {
   if (element.classList.contains("text-revealed")) return;
 
@@ -128,13 +137,7 @@ function animateTextReveal(element) {
   element.classList.add("text-revealed");
 }
 
-/**===========================================
- * Function that initializes shared features
- ============================================*/
-function initSharedFeatures() {
-  initLoader();
-  initMenuToggle();
-  initScrollAnimations();
-}
-
+/**==============================================
+ * Initialize shared features when DOM is ready.
+ ===============================================*/
 document.addEventListener("DOMContentLoaded", initSharedFeatures);
