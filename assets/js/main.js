@@ -124,6 +124,7 @@ function createFeaturesScrollHandler() {
     const sectionHeight = featuresSection.offsetHeight;
     spread.style.transform = `translateY(${sectionHeight}px)`;
     spread.style.opacity = "0";
+    spread.style.visibility = "hidden";
     spread.classList.remove("features__spread--visible");
   });
 
