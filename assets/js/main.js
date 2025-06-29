@@ -333,11 +333,9 @@ function createSpacesScrollHandler() {
 
   const totalSlides = slides.length;
 
-  // Cache DOM measurements
   let cachedSectionTop = spacesSection.offsetTop;
   let cachedSectionHeight = spacesSection.offsetHeight;
 
-  // Update cache function
   const updateCache = () => {
     cachedSectionTop = spacesSection.offsetTop;
     cachedSectionHeight = spacesSection.offsetHeight;
@@ -347,18 +345,20 @@ function createSpacesScrollHandler() {
     const slideWidth = window.innerWidth;
     const totalWidth = slideWidth * totalSlides;
     spacesWrapper.style.width = `${totalWidth}px`;
-    updateCache(); // Update cache when dimensions change
+    updateCache();
   }
 
-  let isFixed = false;
-  let isCompleted = false;
-  let lastScrollTop = 0;
+  const isCurrentlyFixed = spacesSection.classList.contains("is-fixed");
+  const isCurrentlyCompleted = spacesSection.classList.contains("completed");
+
+  let isFixed = isCurrentlyFixed;
+  let isCompleted = isCurrentlyCompleted;
+  let lastScrollTop = window.pageYOffset;
 
   updateDimensions();
   window.addEventListener("resize", updateDimensions, { passive: true });
 
   return function handleSpacesScroll() {
-    // Update cache at the start to ensure fresh values for all calculations
     updateCache();
 
     const scrollTop = window.pageYOffset;
@@ -370,7 +370,6 @@ function createSpacesScrollHandler() {
     const isInSection = scrollTop >= sectionStart && scrollTop <= sectionEnd;
 
     if (isInSection) {
-      // Reset completion state when re-entering section
       if (isCompleted) {
         isCompleted = false;
         spacesSection.classList.remove("completed");
