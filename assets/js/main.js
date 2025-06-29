@@ -121,7 +121,7 @@ function createFeaturesScrollHandler() {
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
     const sectionHeight = featuresSection.offsetHeight;
-    spread.style.transform = `translateY(${sectionHeight}px)`;
+    spread.style.transform = `translate3d(0, ${sectionHeight}px, 0)`;
     spread.style.opacity = "0";
     spread.style.visibility = "hidden";
     spread.classList.remove("features__spread--visible");
@@ -166,7 +166,7 @@ function createFeaturesScrollHandler() {
           spread.style.bottom = "0";
           spread.style.opacity = "1";
           spread.style.visibility = "visible";
-          spread.style.transform = "translateY(0)";
+          spread.style.transform = "translate3d(0, 0, 0)";
           spread.classList.add("features__spread--visible");
 
           const elements = spread.querySelectorAll(
@@ -233,7 +233,7 @@ function createFeaturesScrollHandler() {
             const initialOffset = effectiveHeight + marginBottom;
             const translateY = (1 - cardProgress) * initialOffset;
 
-            spread.style.transform = `translateY(${translateY}px) scale(${scale})`;
+            spread.style.transform = `translate3d(0, ${translateY}px, 0) scale(${scale})`;
             spread.style.opacity = opacity;
             spread.style.visibility = "visible";
             spread.classList.add("features__spread--visible");
@@ -259,7 +259,7 @@ function createFeaturesScrollHandler() {
             const effectiveHeight = sectionHeight - sectionHeight * 0.03;
             const initialOffset = effectiveHeight + marginBottom;
 
-            spread.style.transform = `translateY(${initialOffset}px)`;
+            spread.style.transform = `translate3d(0, ${initialOffset}px, 0)`;
             spread.style.opacity = "0";
             spread.style.visibility = "hidden";
             spread.classList.remove("features__spread--visible");
@@ -287,7 +287,7 @@ function createFeaturesScrollHandler() {
               }
             }
 
-            spread.style.transform = `translateY(0px) scale(${scale})`;
+            spread.style.transform = `translate3d(0, 0, 0) scale(${scale})`;
             spread.style.opacity = opacity;
             spread.style.visibility = "visible";
             spread.classList.add("features__spread--visible");
@@ -359,7 +359,7 @@ function createSpacesScrollHandler() {
       const maxTransform = (totalSlides - 1) * slideWidth;
       const transformX = -clampedProgress * maxTransform;
 
-      spacesWrapper.style.transform = `translateX(${transformX}px)`;
+      spacesWrapper.style.transform = `translate3d(${transformX}px, 0, 0)`;
 
       if (scrollDirection === "up" && isCompleted) {
         isCompleted = false;
@@ -370,7 +370,7 @@ function createSpacesScrollHandler() {
         isFixed = false;
         isCompleted = false;
         spacesSection.classList.remove("is-fixed", "completed");
-        spacesWrapper.style.transform = "translateX(0)";
+        spacesWrapper.style.transform = "translate3d(0, 0, 0)";
       }
     } else if (scrollTop > sectionEnd) {
       if (isFixed && !isCompleted) {
