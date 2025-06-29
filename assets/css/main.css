@@ -2227,7 +2227,7 @@ section {
   margin: 0 auto;
   max-width: 100rem;
   gap: clamp(2rem, 3vw, 3rem);
-  grid-template-columns: repeat(auto-fit, minmax(45rem, 1fr));
+  grid-template-columns: 1fr 1fr;
 }
 
 .ready__visit-cta {
@@ -2310,7 +2310,6 @@ section {
  =====================*/
 @media (max-width: 768px) {
   .ready__visit-actions {
-    grid-template-columns: 1fr;
     gap: clamp(1.5rem, 2vw, 2rem);
   }
 
