@@ -110,9 +110,9 @@ function initSectionObservers() {
   if (spacesSection) observer.observe(spacesSection);
 }
 
-/**==============================================
+/**================================================
  * Function that creates features scroll handler
- ===============================================*/
+ =================================================*/
 function createFeaturesScrollHandler() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
@@ -337,7 +337,7 @@ function createSpacesScrollHandler() {
   let cachedSectionTop = spacesSection.offsetTop;
   let cachedSectionHeight = spacesSection.offsetHeight;
 
-  // Update cache on resize
+  // Update cache function
   const updateCache = () => {
     cachedSectionTop = spacesSection.offsetTop;
     cachedSectionHeight = spacesSection.offsetHeight;
@@ -358,6 +358,9 @@ function createSpacesScrollHandler() {
   window.addEventListener("resize", updateDimensions, { passive: true });
 
   return function handleSpacesScroll() {
+    // Update cache at the start to ensure fresh values for all calculations
+    updateCache();
+
     const scrollTop = window.pageYOffset;
     const viewportHeight = window.innerHeight;
     const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
@@ -367,6 +370,12 @@ function createSpacesScrollHandler() {
     const isInSection = scrollTop >= sectionStart && scrollTop <= sectionEnd;
 
     if (isInSection) {
+      // Reset completion state when re-entering section
+      if (isCompleted) {
+        isCompleted = false;
+        spacesSection.classList.remove("completed");
+      }
+
       if (!isFixed) {
         isFixed = true;
         spacesSection.classList.add("is-fixed");
@@ -382,11 +391,6 @@ function createSpacesScrollHandler() {
       const transformX = -clampedProgress * maxTransform;
 
       spacesWrapper.style.transform = `translate3d(${transformX}px, 0, 0)`;
-
-      if (scrollDirection === "up" && isCompleted) {
-        isCompleted = false;
-        spacesSection.classList.remove("completed");
-      }
     } else if (scrollTop < sectionStart) {
       if (isFixed) {
         isFixed = false;
