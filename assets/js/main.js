@@ -59,21 +59,71 @@ function initMenuToggle() {
   });
 }
 
+/**==================================================
+ * Function that handles scroll-based section detection
+ ===================================================*/
+function initSectionObservers() {
+  const featuresSection = document.querySelector(".features");
+  const spacesSection = document.querySelector(".spaces__horizontal");
+
+  let featuresScrollHandler = null;
+  let spacesScrollHandler = null;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === featuresSection) {
+          if (entry.isIntersecting) {
+            featuresScrollHandler = createFeaturesScrollHandler();
+            window.addEventListener("scroll", featuresScrollHandler, {
+              passive: true,
+            });
+          } else {
+            if (featuresScrollHandler) {
+              window.removeEventListener("scroll", featuresScrollHandler);
+              featuresScrollHandler = null;
+            }
+          }
+        }
+
+        if (entry.target === spacesSection) {
+          if (entry.isIntersecting) {
+            spacesScrollHandler = createSpacesScrollHandler();
+            window.addEventListener("scroll", spacesScrollHandler, {
+              passive: true,
+            });
+          } else {
+            if (spacesScrollHandler) {
+              window.removeEventListener("scroll", spacesScrollHandler);
+              spacesScrollHandler = null;
+            }
+          }
+        }
+      });
+    },
+    {
+      rootMargin: "20% 0px 20% 0px",
+    }
+  );
+
+  if (featuresSection) observer.observe(featuresSection);
+  if (spacesSection) observer.observe(spacesSection);
+}
+
 /**==========================================================
- * Function that handles features scroll-triggered sliding.
+ * Function that creates features scroll handler
  ===========================================================*/
-function initFeaturesSliding() {
+function createFeaturesScrollHandler() {
   const spreads = document.querySelectorAll(".features__spread");
   const featuresSection = document.querySelector(".features");
   const featuresContainer = document.querySelector(".features__container");
 
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
-
+    spread.style.visibility = "hidden";
     const sectionHeight = featuresSection.offsetHeight;
     spread.style.transform = `translateY(${sectionHeight}px)`;
     spread.style.opacity = "0";
-    spread.style.visibility = "hidden";
     spread.classList.remove("features__spread--visible");
   });
 
@@ -81,252 +131,192 @@ function initFeaturesSliding() {
   let lastScrollTop = 0;
   let isCompleted = false;
 
-  function updateSpreadsOnScroll() {
-    const scrollTop = window.pageYOffset;
-    const windowHeight = window.innerHeight;
+  return function handleFeaturesScroll() {
+    if (ticking) return;
 
-    const featuresRect = featuresSection.getBoundingClientRect();
-    const featuresTop = scrollTop + featuresRect.top;
-    const featuresBottom = featuresTop + featuresSection.offsetHeight;
+    requestAnimationFrame(() => {
+      const scrollTop = window.pageYOffset;
+      const windowHeight = window.innerHeight;
 
-    const spacesSection = document.querySelector(".spaces__horizontal");
-    const spacesTop = spacesSection
-      ? scrollTop + spacesSection.getBoundingClientRect().top
-      : featuresBottom;
+      const featuresRect = featuresSection.getBoundingClientRect();
+      const featuresTop = scrollTop + featuresRect.top;
+      const featuresBottom = featuresTop + featuresSection.offsetHeight;
 
-    const featuresHeaderBottom = featuresContainer
-      ? featuresTop + featuresContainer.offsetHeight
-      : featuresTop;
-    const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
-    const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
+      const featuresHeaderBottom = featuresContainer
+        ? featuresTop + featuresContainer.offsetHeight
+        : featuresTop;
+      const featuresStartTrigger = featuresHeaderBottom - windowHeight * 0.8;
+      const featuresEndTrigger = featuresBottom - windowHeight * 1.2;
 
-    const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
-    lastScrollTop = scrollTop;
+      const scrollDirection = scrollTop > lastScrollTop ? "down" : "up";
+      lastScrollTop = scrollTop;
 
-    const inFeaturesSection =
-      scrollTop >= featuresStartTrigger && scrollTop <= featuresEndTrigger;
+      const inFeaturesSection =
+        scrollTop >= featuresStartTrigger && scrollTop <= featuresEndTrigger;
 
-    const hasCompletedFeatures = scrollTop > featuresEndTrigger;
+      const hasCompletedFeatures = scrollTop > featuresEndTrigger;
 
-    if (hasCompletedFeatures && !isCompleted) {
-      isCompleted = true;
+      if (hasCompletedFeatures && !isCompleted) {
+        isCompleted = true;
+        featuresSection.classList.add("features--completed");
 
-      featuresSection.classList.add("features--completed");
+        spreads.forEach((spread) => {
+          spread.style.position = "absolute";
+          spread.style.top = "auto";
+          spread.style.bottom = "0";
+          spread.style.opacity = "1";
+          spread.style.visibility = "visible";
+          spread.style.transform = "translateY(0)";
+          spread.classList.add("features__spread--visible");
 
-      spreads.forEach((spread, index) => {
-        spread.style.position = "absolute";
-        spread.style.top = "auto";
-        spread.style.bottom = "0";
-        spread.style.opacity = "1";
-        spread.style.visibility = "visible";
-        spread.style.transform = "translateY(0)";
-        spread.classList.add("features__spread--visible");
-
-        const elements = spread.querySelectorAll(
-          ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-        );
-        elements.forEach((el) => {
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
-        });
-      });
-
-      ticking = false;
-      return;
-    }
-
-    if (isCompleted && scrollDirection === "up" && inFeaturesSection) {
-      isCompleted = false;
-      featuresSection.classList.remove("features--completed");
-
-      spreads.forEach((spread) => {
-        spread.style.position = "fixed";
-        spread.style.top = "0";
-        spread.style.bottom = "auto";
-      });
-    }
-
-    if (inFeaturesSection && !isCompleted) {
-      const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
-      const scrollProgress = Math.max(
-        0,
-        Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
-      );
-
-      spreads.forEach((spread, index) => {
-        const cardStartProgress = index * 0.2;
-        const cardCompleteProgress = cardStartProgress + 0.15;
-        const nextCardStartProgress = (index + 1) * 0.2;
-
-        if (
-          scrollProgress >= cardStartProgress &&
-          (index === spreads.length - 1 ||
-            scrollProgress < nextCardStartProgress)
-        ) {
-          const cardProgress = Math.max(
-            0,
-            Math.min(
-              1,
-              (scrollProgress - cardStartProgress) /
-                (cardCompleteProgress - cardStartProgress)
-            )
+          const elements = spread.querySelectorAll(
+            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
           );
+          elements.forEach((el) => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          });
+        });
+        ticking = false;
+        return;
+      }
 
-          let scale = 1;
-          let opacity = 1;
+      if (isCompleted && scrollDirection === "up" && inFeaturesSection) {
+        isCompleted = false;
+        featuresSection.classList.remove("features--completed");
 
-          if (index === 0 && cardProgress < 1) {
-            scale = 0.7 + cardProgress * 0.3;
-          }
+        spreads.forEach((spread) => {
+          spread.style.position = "fixed";
+          spread.style.top = "0";
+          spread.style.bottom = "auto";
+        });
+      }
 
-          const sectionHeight = featuresSection.offsetHeight;
-          const marginTop = sectionHeight * 0.015;
-          const marginBottom = sectionHeight * 0.015;
-          const effectiveHeight = sectionHeight - marginTop - marginBottom;
+      if (inFeaturesSection && !isCompleted) {
+        const featuresScrollRange = featuresEndTrigger - featuresStartTrigger;
+        const scrollProgress = Math.max(
+          0,
+          Math.min(1, (scrollTop - featuresStartTrigger) / featuresScrollRange)
+        );
 
-          const initialOffset = effectiveHeight + marginBottom;
-          const translateY = (1 - cardProgress) * initialOffset;
+        spreads.forEach((spread, index) => {
+          const cardStartProgress = index * 0.2;
+          const cardCompleteProgress = cardStartProgress + 0.15;
+          const nextCardStartProgress = (index + 1) * 0.2;
 
-          requestAnimationFrame(() => {
+          if (
+            scrollProgress >= cardStartProgress &&
+            (index === spreads.length - 1 ||
+              scrollProgress < nextCardStartProgress)
+          ) {
+            const cardProgress = Math.max(
+              0,
+              Math.min(
+                1,
+                (scrollProgress - cardStartProgress) /
+                  (cardCompleteProgress - cardStartProgress)
+              )
+            );
+
+            let scale = 1;
+            let opacity = 1;
+
+            if (index === 0 && cardProgress < 1) {
+              scale = 0.7 + cardProgress * 0.3;
+            }
+
+            const sectionHeight = featuresSection.offsetHeight;
+            const marginTop = sectionHeight * 0.015;
+            const marginBottom = sectionHeight * 0.015;
+            const effectiveHeight = sectionHeight - marginTop - marginBottom;
+
+            const initialOffset = effectiveHeight + marginBottom;
+            const translateY = (1 - cardProgress) * initialOffset;
+
             spread.style.transform = `translateY(${translateY}px) scale(${scale})`;
             spread.style.opacity = opacity;
             spread.style.visibility = "visible";
-          });
+            spread.classList.add("features__spread--visible");
 
-          spread.classList.add("features__spread--visible");
+            const elements = spread.querySelectorAll(
+              ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+            );
 
-          const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-          );
-
-          if (cardProgress > 0.3) {
-            elements.forEach((el) => {
-              requestAnimationFrame(() => {
+            if (cardProgress > 0.3) {
+              elements.forEach((el) => {
                 el.style.opacity = "1";
                 el.style.transform = "translateY(0)";
               });
-            });
-          } else {
-            elements.forEach((el) => {
-              requestAnimationFrame(() => {
+            } else {
+              elements.forEach((el) => {
                 el.style.opacity = "0";
                 el.style.transform = "translateY(50px)";
               });
-            });
-          }
-        } else if (scrollProgress < cardStartProgress) {
-          const sectionHeight = featuresSection.offsetHeight;
-          const marginBottom = sectionHeight * 0.015;
-          const effectiveHeight = sectionHeight - sectionHeight * 0.03;
-          const initialOffset = effectiveHeight + marginBottom;
+            }
+          } else if (scrollProgress < cardStartProgress) {
+            const sectionHeight = featuresSection.offsetHeight;
+            const marginBottom = sectionHeight * 0.015;
+            const effectiveHeight = sectionHeight - sectionHeight * 0.03;
+            const initialOffset = effectiveHeight + marginBottom;
 
-          requestAnimationFrame(() => {
             spread.style.transform = `translateY(${initialOffset}px)`;
             spread.style.opacity = "0";
             spread.style.visibility = "hidden";
-          });
+            spread.classList.remove("features__spread--visible");
 
-          spread.classList.remove("features__spread--visible");
-
-          const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-          );
-          elements.forEach((el) => {
-            requestAnimationFrame(() => {
+            const elements = spread.querySelectorAll(
+              ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+            );
+            elements.forEach((el) => {
               el.style.opacity = "0";
               el.style.transform = "translateY(50px)";
             });
-          });
-        } else if (scrollProgress >= cardCompleteProgress) {
-          let scale = 1;
-          let opacity = 1;
+          } else if (scrollProgress >= cardCompleteProgress) {
+            let scale = 1;
+            let opacity = 1;
 
-          if (index < spreads.length - 1) {
-            const nextCardStart = (index + 1) * 0.2;
-            if (scrollProgress >= nextCardStart) {
-              const nextCardProgress = Math.min(
-                1,
-                (scrollProgress - nextCardStart) / 0.15
-              );
-              scale = 1 - nextCardProgress * 0.2;
-              opacity = 1 - nextCardProgress * 0.3;
+            if (index < spreads.length - 1) {
+              const nextCardStart = (index + 1) * 0.2;
+              if (scrollProgress >= nextCardStart) {
+                const nextCardProgress = Math.min(
+                  1,
+                  (scrollProgress - nextCardStart) / 0.15
+                );
+                scale = 1 - nextCardProgress * 0.2;
+                opacity = 1 - nextCardProgress * 0.3;
+              }
             }
-          }
 
-          requestAnimationFrame(() => {
             spread.style.transform = `translateY(0px) scale(${scale})`;
             spread.style.opacity = opacity;
             spread.style.visibility = "visible";
-          });
+            spread.classList.add("features__spread--visible");
 
-          spread.classList.add("features__spread--visible");
-
-          const elements = spread.querySelectorAll(
-            ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-          );
-          elements.forEach((el) => {
-            requestAnimationFrame(() => {
+            const elements = spread.querySelectorAll(
+              ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
+            );
+            elements.forEach((el) => {
               el.style.opacity = "1";
               el.style.transform = "translateY(0)";
             });
-          });
-        }
-      });
-    }
+          }
+        });
+      }
 
-    ticking = false;
-  }
-
-  function requestScrollUpdate() {
-    if (!ticking) {
-      requestAnimationFrame(updateSpreadsOnScroll);
-      ticking = true;
-    }
-  }
-
-  window.addEventListener("scroll", requestScrollUpdate, { passive: true });
-
-  window.addEventListener(
-    "resize",
-    () => {
-      spreads.forEach((spread, index) => {
-        if (!spread.classList.contains("features__spread--visible")) {
-          const sectionHeight = featuresSection.offsetHeight;
-          spread.style.transform = `translateY(${sectionHeight}px)`;
-        }
-      });
-      requestScrollUpdate();
-    },
-    { passive: true }
-  );
-
-  spreads.forEach((spread) => {
-    const elements = spread.querySelectorAll(
-      ".features__spread-number, .features__spread-meta, .features__spread-text, .features__spread-visual"
-    );
-
-    elements.forEach((el) => {
-      el.style.transition = "opacity 0.8s ease, transform 0.8s ease";
-      el.style.opacity = "0";
-      el.style.transform = "translateY(50px)";
+      ticking = false;
     });
-  });
 
-  setTimeout(() => {
-    updateSpreadsOnScroll();
-  }, 100);
+    ticking = true;
+  };
 }
 
 /**==================================================================
- * Function that handles horizontal scroll based on vertical scroll
+ * Function that creates spaces horizontal scroll handler
  ===================================================================*/
-function initSpacesHorizontal() {
+function createSpacesScrollHandler() {
   const spacesSection = document.querySelector(".spaces__horizontal");
-  if (!spacesSection) return;
-
   const spacesWrapper = document.querySelector(".spaces__wrapper");
   const slides = document.querySelectorAll(".spaces__slide");
-  const scrollArea = document.querySelector(".spaces__scroll-area");
 
   const totalSlides = slides.length;
 
@@ -334,19 +324,16 @@ function initSpacesHorizontal() {
     const slideWidth = window.innerWidth;
     const totalWidth = slideWidth * totalSlides;
     spacesWrapper.style.width = `${totalWidth}px`;
-
-    const transformDistance = (totalSlides - 1) * slideWidth;
-    const viewportEquivalent = transformDistance / slideWidth;
-    const scrollHeight = (viewportEquivalent + 1) * 100;
-
-    scrollArea.style.height = `${scrollHeight}vh`;
   }
 
   let isFixed = false;
   let isCompleted = false;
   let lastScrollTop = 0;
 
-  function handleScroll() {
+  updateDimensions();
+  window.addEventListener("resize", updateDimensions, { passive: true });
+
+  return function handleSpacesScroll() {
     const scrollTop = window.pageYOffset;
     const sectionTop = spacesSection.offsetTop;
     const sectionHeight = spacesSection.offsetHeight;
@@ -372,9 +359,7 @@ function initSpacesHorizontal() {
       const maxTransform = (totalSlides - 1) * slideWidth;
       const transformX = -clampedProgress * maxTransform;
 
-      requestAnimationFrame(() => {
-        spacesWrapper.style.transform = `translateX(${transformX}px)`;
-      });
+      spacesWrapper.style.transform = `translateX(${transformX}px)`;
 
       if (scrollDirection === "up" && isCompleted) {
         isCompleted = false;
@@ -385,9 +370,7 @@ function initSpacesHorizontal() {
         isFixed = false;
         isCompleted = false;
         spacesSection.classList.remove("is-fixed", "completed");
-        requestAnimationFrame(() => {
-          spacesWrapper.style.transform = "translateX(0)";
-        });
+        spacesWrapper.style.transform = "translateX(0)";
       }
     } else if (scrollTop > sectionEnd) {
       if (isFixed && !isCompleted) {
@@ -399,27 +382,7 @@ function initSpacesHorizontal() {
     }
 
     lastScrollTop = scrollTop;
-  }
-
-  let ticking = false;
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    },
-    { passive: true }
-  );
-
-  window.addEventListener("resize", updateDimensions, { passive: true });
-
-  updateDimensions();
-  setTimeout(handleScroll, 100);
+  };
 }
 
 /**=======================================
@@ -493,8 +456,7 @@ function animateTextReveal(element) {
 function init() {
   initLoader();
   initMenuToggle();
-  initFeaturesSliding();
-  initSpacesHorizontal();
+  initSectionObservers();
   initScrollAnimations();
 }
 
