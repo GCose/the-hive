@@ -120,7 +120,6 @@ function createFeaturesScrollHandler() {
 
   spreads.forEach((spread, index) => {
     spread.style.zIndex = 1 + index;
-    spread.style.visibility = "hidden";
     const sectionHeight = featuresSection.offsetHeight;
     spread.style.transform = `translateY(${sectionHeight}px)`;
     spread.style.opacity = "0";
