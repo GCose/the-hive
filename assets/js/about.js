@@ -54,33 +54,6 @@ function initAboutAnimations() {
       valuesObserver.observe(card);
     });
   }
-
-  // Mission goals stagger animation
-  const missionGoals = document.querySelectorAll(".about__mission-goal");
-
-  if (missionGoals.length > 0) {
-    const goalsObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry, index) => {
-          if (entry.isIntersecting) {
-            setTimeout(() => {
-              entry.target.style.opacity = "1";
-              entry.target.style.transform = "translateX(0)";
-            }, index * 200);
-            goalsObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-
-    missionGoals.forEach((goal, index) => {
-      goal.style.opacity = "0";
-      goal.style.transform = "translateX(-30px)";
-      goal.style.transition = "opacity 0.8s ease, transform 0.8s ease";
-      goalsObserver.observe(goal);
-    });
-  }
 }
 
 /**=========================================
