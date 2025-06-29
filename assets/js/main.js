@@ -59,9 +59,9 @@ function initMenuToggle() {
   });
 }
 
-/**==================================================
+/**======================================================
  * Function that handles scroll-based section detection
- ===================================================*/
+ =======================================================*/
 function initSectionObservers() {
   const featuresSection = document.querySelector(".features");
   const spacesSection = document.querySelector(".spaces__horizontal");
